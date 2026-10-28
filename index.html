@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>Hastane Yorum Atlas&#305;</title>
+<style>
+:root{color-scheme:light;--ink:#20242b;--muted:#747d89;--line:#e7e9ee;--surface:#fff;--soft:#f8f9fb;--accent:#5865d8}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#fff;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:13px}body{overflow-x:hidden}
+.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:#fff}.brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:14px;letter-spacing:-.025em}.brand-mark{width:30px;height:30px;border-radius:9px;border:1px solid #e3e5f4;background:#f4f5fc;color:#5964c8;display:grid;place-items:center;font-size:17px}.topright{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px}.count-badge{background:#f7f8fa;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-variant-numeric:tabular-nums;color:#303641;font-weight:700}
+main{padding:16px 20px 22px;max-width:1900px;margin:auto}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 12px;border:1px solid var(--line);border-radius:12px 12px 0 0;background:#fff}.control{display:flex;align-items:center;gap:7px}.control label{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#7a828d;font-weight:800;white-space:nowrap}.control select,.search-input,.small-btn{height:36px;border:1px solid #dfe3e9;border-radius:8px;background:#fff;color:#303641;padding:0 10px;font:inherit;font-size:11px;outline:none}.control select:focus,.search-input:focus{border-color:#8e98de;box-shadow:0 0 0 3px #6773d514}.city-control select{width:205px}.rating-control select{width:128px}.search-control{flex:1;min-width:170px}.search-input{width:100%;min-width:150px}.search-input::placeholder{color:#9ba2ad}.small-btn{cursor:pointer;font-weight:650;white-space:nowrap;background:#f8f9fb}.small-btn:hover{background:#f0f2f6}.filter-count{margin-left:auto;font-size:10px;color:#7f8793;white-space:nowrap;font-variant-numeric:tabular-nums}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 320px;border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;overflow:hidden;background:#fff;min-height:630px}.map-panel{min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}.mapbar{min-height:39px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #edf0f3;background:#fff}.mapbar-title{font-size:9px;letter-spacing:.12em;font-weight:800;color:#555e6b}.mapbar-help{font-size:10px;color:#9299a4;text-align:right}.canvas-wrap{position:relative;min-height:490px;height:min(68vh,790px);background:#fff;overflow:hidden;touch-action:none}.canvas-wrap canvas{display:block;width:100%;height:100%;outline:none;cursor:grab}.loading-cover{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;background:#ffffffef;color:#343b46}.loading-cover[hidden]{display:none}.loader-ring{width:30px;height:30px;border:2px solid #e8eaf1;border-top-color:#6672d5;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.loading-text{font-size:12px;font-weight:700}.loading-sub{font-size:10px;color:#89919c}.tooltip{position:absolute;display:none;z-index:4;pointer-events:none;max-width:285px;padding:10px 12px;border:1px solid #e1e4eb;border-radius:9px;background:#fff;box-shadow:0 8px 24px #1b24331a;color:#303641;font-size:10px;line-height:1.55}.tooltip strong{display:block;color:#4954be;font-size:10px;margin-bottom:3px}.legend{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid #eceef2;border-bottom:1px solid #eceef2;background:#fff}.legend-btn{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid #e4e7ed;border-radius:7px;background:#fff;color:#68717e;font-size:9px;cursor:pointer;transition:background .14s,border-color .14s,color .14s}.legend-btn:hover{border-color:#bac0d0;color:#303641}.legend-btn[aria-pressed="true"]{border-color:var(--topic-color);background:color-mix(in srgb,var(--topic-color) 9%,#fff);color:#262b34}.legend-swatch{width:7px;height:7px;border-radius:50%;background:var(--topic-color);flex:none}.legend-btn small{font-size:9px;color:#9299a4}.map-footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 13px;color:#878f9b;background:#fff;font-size:9px}.map-footer strong{color:#46505d;font-weight:750}
+.side-panel{min-width:0;display:flex;flex-direction:column;gap:14px;padding:17px;background:#fff;max-height:calc(min(68vh,790px) + 39px + 100px);overflow:auto}.side-kicker{font-size:9px;font-weight:800;letter-spacing:.12em;color:#858d99;text-transform:uppercase}.side-panel h2{margin:-7px 0 0;font-size:19px;line-height:1.25;letter-spacing:-.035em;overflow-wrap:anywhere;font-weight:700}.side-meta{display:flex;gap:6px;flex-wrap:wrap}.meta-pill{border:1px solid #e4e7ed;border-radius:99px;background:#fff;padding:6px 8px;color:#68717e;font-size:9px}.rating-pill{background:#faf7ee;border-color:#ece2c7;color:#8a6b2b}.side-text{font-size:12px;line-height:1.8;color:#454d58;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}.side-section{padding-top:12px;border-top:1px solid #eceef2}.side-section h3{font-size:9px;letter-spacing:.12em;color:#808895;margin:0 0 10px;text-transform:uppercase;font-weight:800}.metric-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f0f1f4;font-size:10px;color:#747d89}.metric-row strong{color:#333a45;font-size:10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:650;max-width:190px;overflow-wrap:anywhere}.cluster-detail{display:flex;align-items:flex-start;gap:9px;margin-bottom:3px}.cluster-detail>div{min-width:0;overflow-wrap:anywhere}.cluster-detail strong{display:block;font-size:11px;color:#343b46;margin-bottom:4px}.cluster-dot{width:9px;height:9px;border-radius:50%;flex:none;margin-top:3px}.muted{color:#89919c;font-size:10px;line-height:1.7}.side-bottom{margin-top:auto;padding-top:12px;border-top:1px solid #eceef2;color:#969da7;font-size:9px;line-height:1.7}
+@media(max-width:1100px){main{padding:12px}.workspace{grid-template-columns:minmax(0,1fr) 285px}.city-control select{width:175px}.canvas-wrap{height:60vh;min-height:420px}.side-panel{padding:13px;max-height:calc(60vh + 140px)}}@media(max-width:780px){.topbar{padding:0 13px}main{padding:10px 7px}.workspace{grid-template-columns:1fr}.map-panel{border-right:0}.canvas-wrap{height:58vh;min-height:370px}.side-panel{max-height:none;border-top:1px solid var(--line);padding:15px}.filters{gap:7px}.control{flex:1}.city-control select,.rating-control select{width:100%}.search-control{flex-basis:100%;order:5}.filter-count{margin:0;flex-basis:100%}.mapbar{align-items:flex-start;flex-direction:column;gap:5px}.mapbar-help{text-align:left}.topright .context{display:none}}
+@media(prefers-reduced-motion:reduce){.loader-ring{animation:none}.legend-btn{transition:none}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-mark">&#10038;</span><span>Hastane Yorum Atlas&#305;</span></div><div class="topright"><span class="context">3B anlamsal g&#246;r&#252;n&#252;m</span><span class="count-badge">119.427 yorum</span></div></header>
+<main>
+<section class="toolbar" aria-label="Filtreler">
+ <div class="control city-control"><label for="citySelect">&#350;ehir</label><select id="citySelect"><option value="-1">T&#252;m &#351;ehirler</option></select></div>
+ <div class="control rating-control"><label for="ratingSelect">Puan</label><select id="ratingSelect"><option value="0">1&#8211;2 y&#305;ld&#305;z</option><option value="1">Sadece 1 y&#305;ld&#305;z</option><option value="2">Sadece 2 y&#305;ld&#305;z</option></select></div>
+ <div class="control search-control"><input class="search-input" id="textSearch" type="search" placeholder="Yorum veya hastane ara&#8230;" aria-label="Yorum veya hastane ara"></div>
+ <button class="small-btn" id="resetView" type="button">S&#305;f&#305;rla</button><span class="filter-count" id="filterCount">119.427 yorum</span>
+</section>
+<section class="workspace">
+ <div class="map-panel">
+  <div class="mapbar"><span class="mapbar-title">3B EMBEDDING EVREN&#304;</span><span class="mapbar-help">S&#252;r&#252;kle: d&#246;nd&#252;r &middot; Tekerlek: yak&#305;nla&#351;t&#305;r &middot; Nokta: yorumu a&#231;</span></div>
+  <div class="canvas-wrap" id="canvasWrap"><canvas id="universe" tabindex="0" aria-label="3 boyutlu yorum embedding evreni"></canvas><div class="tooltip" id="tooltip"></div><div class="loading-cover" id="loading"><div class="loader-ring"></div><div class="loading-text" id="loadingText">3B evren haz&#305;rlan&#305;yor&#8230;</div><div class="loading-sub" id="loadingSub">Ger&#231;ek embedding koordinatlar&#305; y&#252;kleniyor</div></div></div>
+  <div class="legend" id="topicLegend" aria-label="K&#252;me filtreleri"><button type="button" class="legend-btn" data-topic="-1" aria-pressed="true" style="--topic-color:#8f96a3"><i class="legend-swatch"></i>T&#252;m k&#252;meler</button></div>
+  <div class="map-footer"><span id="visibleSummary"><strong>119.427</strong> yorum</span><span><strong>&#199;emberler</strong> &middot; se&#231;ili filtredeki k&#252;me s&#305;n&#305;rlar&#305;</span></div>
+ </div>
+ <aside class="side-panel" aria-live="polite">
+  <div class="side-kicker" id="detailKicker">YORUM SE&#199;&#304;LMED&#304;</div><h2 id="detailTitle">Yorum ayr&#305;nt&#305;s&#305;</h2>
+  <div class="side-meta" id="detailMeta"><span class="meta-pill">Bir nokta se&#231;</span></div>
+  <p class="side-text" id="detailText">&#8212;</p>
+  <div class="side-section"><h3>G&#246;r&#252;n&#252;m</h3><div class="metric-row"><span>G&#246;r&#252;nen yorum</span><strong id="visibleMetric">119.427</strong></div><div class="metric-row"><span>Aktif filtre</span><strong id="activeFilterMetric">T&#252;m &#351;ehirler</strong></div><div class="metric-row"><span>Yak&#305;nla&#351;t&#305;rma</span><strong id="zoomMetric">100%</strong></div></div>
+  <div class="side-section"><h3>Se&#231;ili kay&#305;t</h3><div class="cluster-detail"><i class="cluster-dot" id="detailColor" style="background:#7a82d7"></i><div><strong id="detailCluster">&#8212;</strong><div class="muted" id="detailPlace">&#8212;</div></div></div>
+   <div class="metric-row"><span>&#350;ehir</span><strong id="detailCity">&#8212;</strong></div><div class="metric-row"><span>Tarih</span><strong id="detailDate">&#8212;</strong></div><div class="metric-row"><span>Y&#305;ld&#305;z</span><strong id="detailRating">&#8212;</strong></div>
+  </div>
+ </aside>
+</section>
+</main>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const canvas=$('universe'),wrap=$('canvasWrap'),tooltip=$('tooltip');
+const gl=canvas.getContext('webgl',{alpha:false,antialias:true,depth:true,stencil:false,preserveDrawingBuffer:false});
+let data=null,points=[],places=[],cities=[],topics=[],frameData=null;
+let visible=new Int32Array(0),visibleN=0,positions=new Float32Array(0),screenXY=new Float32Array(0),screenDepth=new Float32Array(0),spatial=new Map(),gridCols=1,gridCell=17;
+let width=800,height=520,dpr=1,aspect=1,zoom=2.6,yaw=.52,pitch=-.2,panX=0,panY=0,cityFilter=-1,ratingFilter=0,topicFilter=-1,searchTerm='',selectedPoint=-1,hoveredPoint=-1,drag=null,didDrag=false,glProgram=null,pointBuffer=null,lineBuffer=null,markerBuffer=null,glReady=false;
+const COLORS=['#6c91d5','#d7a456','#9882d4','#65b69b','#dc8a83','#b3a65e','#54b8b2','#cf87ae'];
+const compact=n=>Number(n||0).toLocaleString('tr-TR');
+const U=(...codes)=>String.fromCharCode(...codes);
+const CITY_ALL='T'+U(252)+'m '+U(351)+'ehirler';
+const CITY_UNKNOWN=U(350)+'ehir bilinmiyor';
+const DASH=U(8212);
+
+const dateFromDay=d=>{const x=new Date(Date.UTC(2000,0,1)+Number(d)*86400000);return x.toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric',timeZone:'UTC'})};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function setLoading(a,b){$('loadingText').textContent=a;$('loadingSub').textContent=b}
+function rgba(hex,a){const h=hex.replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')'}
+function initGL(){
+ if(!gl)throw new Error('WebGL etkin degil. Guncel Chrome veya Edge ile ac.');
+ const vs=`attribute vec3 aPosition; attribute vec3 aColor; attribute float aSize; uniform vec2 uCanvas; uniform float uYaw; uniform float uPitch; uniform float uZoom; uniform float uPixelRatio; uniform vec2 uPan; varying vec3 vColor; varying float vAlpha; void main(){float cy=cos(uYaw),sy=sin(uYaw),cx=cos(uPitch),sx=sin(uPitch);float rx=cy*aPosition.x+sy*aPosition.z;float rz=-sy*aPosition.x+cy*aPosition.z;float ry=cx*aPosition.y-sx*rz;float rz2=sx*aPosition.y+cx*rz;float dist=max(0.22,3.4-rz2);float focal=1.85*uZoom;float aspect=uCanvas.x/uCanvas.y;float nx=rx*focal/aspect+2.0*uPan.x/uCanvas.x*dist;float ny=ry*focal-2.0*uPan.y/uCanvas.y*dist;float far=50.0,near=0.08;float zc=((far+near)/(far-near))*dist-(2.0*far*near)/(far-near);gl_Position=vec4(nx,ny,zc,dist);gl_PointSize=aSize*uPixelRatio*clamp(2.65/dist,0.75,3.6)*clamp(sqrt(sqrt(uZoom)),1.0,1.8);vColor=aColor;vAlpha=clamp(1.12-dist*0.065,0.55,1.0);}`;
+ const fs=`precision mediump float; varying vec3 vColor; varying float vAlpha; uniform float uRound; void main(){float a=1.0;if(uRound>0.5){float d=length(gl_PointCoord-vec2(0.5));if(uRound>1.5){if(d<0.32||d>0.5)discard;a=1.0-smoothstep(0.44,0.5,d);}else{if(d>0.5)discard;a=1.0-smoothstep(0.28,0.5,d);}}gl_FragColor=vec4(vColor,a*vAlpha);}`;
+ const compile=(type,src)=>{const sh=gl.createShader(type);gl.shaderSource(sh,src);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(sh)||'Shader derlenemedi');return sh};
+ glProgram=gl.createProgram();gl.attachShader(glProgram,compile(gl.VERTEX_SHADER,vs));gl.attachShader(glProgram,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(glProgram);if(!gl.getProgramParameter(glProgram,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(glProgram)||'WebGL program baglanamadi');gl.useProgram(glProgram);
+ glProgram.aPosition=gl.getAttribLocation(glProgram,'aPosition');glProgram.aColor=gl.getAttribLocation(glProgram,'aColor');glProgram.aSize=gl.getAttribLocation(glProgram,'aSize');
+ for(const n of ['uCanvas','uYaw','uPitch','uZoom','uPixelRatio','uPan','uRound'])glProgram[n]=gl.getUniformLocation(glProgram,n);
+ pointBuffer=gl.createBuffer();lineBuffer=gl.createBuffer();markerBuffer=gl.createBuffer();gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);glReady=true;
+}
+function setupAttrs(buffer){gl.bindBuffer(gl.ARRAY_BUFFER,buffer);const stride=7*4;gl.enableVertexAttribArray(glProgram.aPosition);gl.vertexAttribPointer(glProgram.aPosition,3,gl.FLOAT,false,stride,0);gl.enableVertexAttribArray(glProgram.aColor);gl.vertexAttribPointer(glProgram.aColor,3,gl.FLOAT,false,stride,12);gl.enableVertexAttribArray(glProgram.aSize);gl.vertexAttribPointer(glProgram.aSize,1,gl.FLOAT,false,stride,24)}
+async function loadData(){
+ initGL();setLoading('3B evren yukleniyor...','119 bin yorumun uzaydaki koordinatlari okunuyor');
+ const response=await fetch('./review-universe.json.gz',{cache:'no-store'});if(!response.ok)throw new Error('Yorum verisi yuklenemedi (HTTP '+response.status+').');if(!('DecompressionStream'in window))throw new Error('Bu tarayici sikistirilmis veriyi acamiyor.');
+ const stream=response.body.pipeThrough(new DecompressionStream('gzip'));const raw=await new Response(stream).text();setLoading('Noktalar hazirlaniyor...','3B koordinatlar ve filtreler baglaniyor');data=JSON.parse(raw);
+ if(data.dimensions!==3||data.points.some(p=>p.length!==9))throw new Error('3B koordinat dosyasi henuz hazir degil. Sayfayi yenile.');
+ points=data.points;places=data.places;cities=data.cities;topics=data.topics;screenXY=new Float32Array(points.length*2);screenDepth=new Float32Array(points.length);positions=new Float32Array(points.length*3);
+ let sum=[0,0,0];for(const p of points){sum[0]+=p[0];sum[1]+=p[1];sum[2]+=p[2]}const mean=sum.map(v=>v/points.length);let sq=[0,0,0];for(const p of points)for(let a=0;a<3;a++)sq[a]+=(p[a]-mean[a])**2;const sd=sq.map(v=>Math.sqrt(v/points.length));const scale=Math.max(...sd);
+ let radii=new Float32Array(points.length);for(let i=0;i<points.length;i++){const p=points[i];let x=(p[0]-mean[0])/scale,y=(p[1]-mean[1])/scale,z=(p[2]-mean[2])/scale;positions[i*3]=x;positions[i*3+1]=y;positions[i*3+2]=z;radii[i]=Math.hypot(x,y,z)}radii.sort();const r90=radii[Math.floor((radii.length-1)*.90)];const factor=1.3/Math.max(r90,1e-5);for(let i=0;i<positions.length;i++)positions[i]*=factor;
+ $('citySelect').innerHTML='<option value="-1">T&#252;m &#351;ehirler ('+compact(data.count)+')</option>'+cities.map(c=>'<option value="'+c.id+'">'+esc(c.name)+' &middot; '+compact(c.count)+'</option>').join('');
+ $('topicLegend').innerHTML='<button type="button" class="legend-btn" data-topic="-1" aria-pressed="true" style="--topic-color:#8f96a3"><i class="legend-swatch"></i>T&#252;m k&#252;meler</button>'+topics.map((t,i)=>'<button type="button" class="legend-btn" data-topic="'+t.id+'" aria-pressed="false" style="--topic-color:'+COLORS[i]+'"><i class="legend-swatch"></i>'+esc(t.short)+' <small>'+compact(t.count)+' &middot; %'+Number(t.share||0).toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1})+'</small></button>').join('');
+ $('topicLegend').querySelectorAll('[data-topic]').forEach(b=>b.addEventListener('click',()=>{topicFilter=Number(b.dataset.topic);selectedPoint=-1;showDefaultDetail();rebuildVisible()}));
+ $('loading').hidden=true;zoom=2.6;yaw=.52;pitch=-.2;panX=0;panY=0;sizeCanvas();rebuildVisible();
+}
+function sizeCanvas(){const r=wrap.getBoundingClientRect();width=Math.max(300,r.width);height=Math.max(300,r.height);dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);canvas.style.width=width+'px';canvas.style.height=height+'px';if(glReady){gl.viewport(0,0,canvas.width,canvas.height);draw()}}
+function projectIndex(i){const x=positions[i*3],y=positions[i*3+1],z=positions[i*3+2],cy=Math.cos(yaw),sy=Math.sin(yaw),cx=Math.cos(pitch),sx=Math.sin(pitch);const rx=cy*x+sy*z,rz=-sy*x+cy*z,ry=cx*y-sx*rz,rz2=sx*y+cx*rz,dist=Math.max(.22,3.4-rz2),f=1.85*zoom;return [width/2+rx*f*height/(2*dist)+panX,height/2-ry*f*height/(2*dist)+panY,dist]}
+function quantile(a,q){if(!a.length)return 0;a.sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor((a.length-1)*q))]}
+function hexRGB(hex){return [parseInt(hex.slice(1,3),16)/255,parseInt(hex.slice(3,5),16)/255,parseInt(hex.slice(5,7),16)/255]}
+function makeBuffers(){const stride=7;const arr=new Float32Array(visibleN*stride);let n=0;for(const i of visible){const p=points[i],pos=i*3,col=hexRGB(COLORS[p[3]]||'#9ba2ac');arr[n++]=positions[pos];arr[n++]=positions[pos+1];arr[n++]=positions[pos+2];arr[n++]=col[0];arr[n++]=col[1];arr[n++]=col[2];arr[n++]=2.7}gl.bindBuffer(gl.ARRAY_BUFFER,pointBuffer);gl.bufferData(gl.ARRAY_BUFFER,arr,gl.DYNAMIC_DRAW);frameData={pointVertices:visibleN,lineVertices:0};}
+function draw(rebuildHitMap=true){
+ if(!data||!glReady)return;
+ gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(1,1,1,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(glProgram);
+ gl.uniform2f(glProgram.uCanvas,width,height);gl.uniform1f(glProgram.uYaw,yaw);gl.uniform1f(glProgram.uPitch,pitch);gl.uniform1f(glProgram.uZoom,zoom);gl.uniform1f(glProgram.uPixelRatio,dpr);gl.uniform2f(glProgram.uPan,panX,panY);
+ gl.uniform1f(glProgram.uRound,1);setupAttrs(pointBuffer);gl.drawArrays(gl.POINTS,0,frameData?frameData.pointVertices:0);
+ if(rebuildHitMap){
+  spatial=new Map();gridCols=Math.max(1,Math.ceil(width/gridCell));
+  for(let z=0;z<visible.length;z++){const i=visible[z],[x,y,d]=projectIndex(i);screenXY[i*2]=x;screenXY[i*2+1]=y;screenDepth[i]=d;if(x < -6||y < -6||x>width+6||y>height+6)continue;const key=Math.floor(y/gridCell)*gridCols+Math.floor(x/gridCell);let a=spatial.get(key);if(!a){a=[];spatial.set(key,a)}a.push(i)}
+ }
+ gl.disable(gl.DEPTH_TEST);
+ if(selectedPoint>=0&&isVisible(selectedPoint))drawHighlight(selectedPoint,true);
+ if(hoveredPoint>=0&&hoveredPoint!==selectedPoint&&isVisible(hoveredPoint))drawHighlight(hoveredPoint,false);
+ gl.enable(gl.DEPTH_TEST);
+}
+function drawHighlight(i,isSelected){
+ const p=points[i];if(!p)return;
+ const pos=i*3,col=hexRGB(COLORS[p[3]]||'#6978dc');
+ const emit=(size,rgb,mode)=>{const v=new Float32Array([positions[pos],positions[pos+1],positions[pos+2],rgb[0],rgb[1],rgb[2],size]);gl.bindBuffer(gl.ARRAY_BUFFER,markerBuffer);gl.bufferData(gl.ARRAY_BUFFER,v,gl.DYNAMIC_DRAW);setupAttrs(markerBuffer);gl.uniform1f(glProgram.uRound,mode);gl.drawArrays(gl.POINTS,0,1)};
+ // Soft topic-coloured halo, bright outline, then a white core make the target unmistakable.
+ emit(isSelected?15:11,col,1);
+ emit(isSelected?19:14,[0.98,0.99,1.0],2);
+ emit(isSelected?5.2:4.1,[1.0,1.0,1.0],1);
+}
+function rebuildVisible(){if(!data)return;const ids=[],terms=searchTerm?searchTerm.toLocaleLowerCase('tr-TR'):'';for(let i=0;i<points.length;i++){const p=points[i];if(cityFilter>=0&&p[4]!==cityFilter)continue;if(topicFilter>=0&&p[3]!==topicFilter)continue;if(ratingFilter>0&&p[5]!==ratingFilter)continue;if(terms&& !String(p[8]).toLocaleLowerCase('tr-TR').includes(terms)&&!(places[p[7]]?.name||'').toLocaleLowerCase('tr-TR').includes(terms))continue;ids.push(i)}visible=Int32Array.from(ids);visibleN=visible.length;makeBuffers();if(hoveredPoint>=0&&!isVisible(hoveredPoint))hoveredPoint=-1;renderFilters();draw();if(selectedPoint>=0&&!isVisible(selectedPoint)){selectedPoint=-1;showDefaultDetail()}}
+function isVisible(i){const p=points[i];return(cityFilter<0||p[4]===cityFilter)&&(topicFilter<0||p[3]===topicFilter)&&(!ratingFilter||p[5]===ratingFilter)&&(!searchTerm||(String(p[8]).toLocaleLowerCase('tr-TR').includes(searchTerm.toLocaleLowerCase('tr-TR'))||(places[p[7]]?.name||'').toLocaleLowerCase('tr-TR').includes(searchTerm.toLocaleLowerCase('tr-TR'))))}
+function renderFilters(){
+ $('topicLegend').querySelectorAll('[data-topic]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.topic)===topicFilter)));
+ $('filterCount').textContent=compact(visibleN)+' / '+compact(points.length);$('visibleMetric').textContent=compact(visibleN);
+ $('activeFilterMetric').textContent=(cityFilter<0?CITY_ALL:(cities[cityFilter]?.name||CITY_UNKNOWN))+(topicFilter>=0?' '+U(183)+' '+topics[topicFilter].short:'');
+ $('zoomMetric').textContent=Math.round(zoom*100)+'%';$('visibleSummary').innerHTML='<strong>'+compact(visibleN)+'</strong> / '+compact(points.length)+' yorum';
+}
+function nearestAt(x,y){const gx=Math.floor(x/gridCell),gy=Math.floor(y/gridCell);let best=-1,bd=19*19,bdepth=Infinity;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const a=spatial.get((gy+dy)*gridCols+(gx+dx));if(!a)continue;for(const i of a){const dx=screenXY[i*2]-x,dy=screenXY[i*2+1]-y,d=dx*dx+dy*dy,dep=screenDepth[i];if(d<bd||(d===bd&&dep<bdepth)){bd=d;best=i;bdepth=dep}}}return best}
+function showPoint(i){if(i<0||!points[i])return;selectedPoint=i;const p=points[i],place=places[p[7]]||{name:'Tesis bilgisi yok'},city=cities[p[4]]?.name||CITY_UNKNOWN,topic=topics[p[3]];$('detailKicker').textContent='YORUM KAYDI';$('detailTitle').textContent=topic.label;$('detailMeta').innerHTML='<span class="meta-pill rating-pill">'+String.fromCharCode(9733).repeat(p[5])+' &#183; '+p[5]+'/5</span><span class="meta-pill">'+esc(city)+'</span><span class="meta-pill">'+esc(dateFromDay(p[6]))+'</span>';$('detailText').textContent=p[8]||'(Yorum metni yok.)';$('detailPlace').textContent=place.name||'Tesis bilinmiyor';$('detailCluster').textContent=topic.label;$('detailColor').style.background=COLORS[p[3]];$('detailDate').textContent=dateFromDay(p[6]);$('detailCity').textContent=city;$('detailRating').textContent=p[5]+'/5';draw()}
+function showDefaultDetail(){$('detailKicker').textContent='YORUM SE'+U(199,304)+'LMED'+U(304);$('detailTitle').textContent='Yorum ayr'+U(305)+'nt'+U(305)+'s'+U(305);$('detailMeta').innerHTML='<span class="meta-pill">Bir nokta se&#231;</span>';$('detailText').textContent=DASH;$('detailPlace').textContent=DASH;$('detailCluster').textContent=DASH;$('detailColor').style.background='#8f96a3';$('detailDate').textContent=DASH;$('detailCity').textContent=DASH;$('detailRating').textContent=DASH}
+function pointerPos(e){const r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]}
+function updateTooltip(i,x,y){
+ if(i<0){tooltip.style.display='none';return}
+ const p=points[i],place=places[p[7]]||{name:''},topic=topics[p[3]],city=cities[p[4]]?.name||CITY_UNKNOWN;
+ tooltip.innerHTML='<strong>'+esc(topic.short)+' '+U(183)+' '+p[5]+'/5</strong>'+esc(place.name)+'<br>'+esc(city)+' '+U(183)+' '+esc(dateFromDay(p[6]))+'<br>'+esc(String(p[8]).slice(0,130))+(String(p[8]).length>130?U(8230):'');
+ tooltip.style.display='block';const tw=tooltip.offsetWidth,th=tooltip.offsetHeight;tooltip.style.left=Math.max(8,Math.min(width-tw-8,x+13))+'px';tooltip.style.top=Math.max(8,Math.min(height-th-8,y+13))+'px';
+}
+function resetView(){zoom=2.6;yaw=.52;pitch=-.2;panX=0;panY=0;cityFilter=-1;ratingFilter=0;topicFilter=-1;searchTerm='';selectedPoint=-1;hoveredPoint=-1;$('citySelect').value='-1';$('ratingSelect').value='0';$('textSearch').value='';tooltip.style.display='none';showDefaultDetail();rebuildVisible()}
+canvas.addEventListener('pointerdown',e=>{const [x,y]=pointerPos(e);drag={x,y,panX,panY,yaw,pitch};didDrag=false;canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing'});
+canvas.addEventListener('pointermove',e=>{const [x,y]=pointerPos(e);if(drag){const dx=x-drag.x,dy=y-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)didDrag=true;if(didDrag){if(e.shiftKey){panX=drag.panX+dx;panY=drag.panY+dy}else{yaw=drag.yaw+dx*.008;pitch=Math.max(-1.48,Math.min(1.48,drag.pitch+dy*.008))}draw()}return}const i=nearestAt(x,y);if(i!==hoveredPoint){hoveredPoint=i;draw(false)}canvas.style.cursor=i>=0?'pointer':'grab';updateTooltip(i,x,y)});
+canvas.addEventListener('pointerup',e=>{if(!drag)return;const [x,y]=pointerPos(e);if(!didDrag){const i=nearestAt(x,y);if(i>=0)showPoint(i)}drag=null;canvas.style.cursor='grab'});canvas.addEventListener('pointercancel',()=>{drag=null;canvas.style.cursor='grab'});canvas.addEventListener('pointerleave',()=>{if(!drag){tooltip.style.display='none';if(hoveredPoint>=0){hoveredPoint=-1;draw(false)}}});
+canvas.addEventListener('wheel',e=>{e.preventDefault();const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,old=zoom;zoom=Math.max(.25,Math.min(50,zoom*(e.deltaY<0?1.18:1/1.18)));const ratio=zoom/old;panX=mx-width/2-(mx-width/2-panX)*ratio;panY=my-height/2-(my-height/2-panY)*ratio;draw();renderFilters()},{passive:false});canvas.addEventListener('dblclick',e=>{const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,old=zoom;zoom=Math.min(50,zoom*1.7);const ratio=zoom/old;panX=mx-width/2-(mx-width/2-panX)*ratio;panY=my-height/2-(my-height/2-panY)*ratio;draw();renderFilters()});canvas.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const i=nearestAt(width/2,height/2);if(i>=0)showPoint(i)}else if(e.key==='ArrowLeft'){yaw-=.1;draw()}else if(e.key==='ArrowRight'){yaw+=.1;draw()}else if(e.key==='ArrowUp'){pitch=Math.max(-1.48,pitch-.1);draw()}else if(e.key==='ArrowDown'){pitch=Math.min(1.48,pitch+.1);draw()}else if(e.key==='+'||e.key==='='){zoom=Math.min(50,zoom*1.2);draw();renderFilters()}else if(e.key==='-'){zoom=Math.max(.25,zoom/1.2);draw();renderFilters()}});
+$('citySelect').addEventListener('change',()=>{cityFilter=Number($('citySelect').value);selectedPoint=-1;showDefaultDetail();rebuildVisible()});$('ratingSelect').addEventListener('change',()=>{ratingFilter=Number($('ratingSelect').value);selectedPoint=-1;showDefaultDetail();rebuildVisible()});let timer=null;$('textSearch').addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{searchTerm=$('textSearch').value.trim();selectedPoint=-1;showDefaultDetail();rebuildVisible()},160)});$('resetView').addEventListener('click',resetView);window.addEventListener('resize',sizeCanvas);
+showDefaultDetail();loadData().catch(err=>{console.error(err);$('loading').hidden=false;$('loadingText').textContent='Evren acilamadi';$('loadingSub').textContent=err.message||String(err);$('loading').querySelector('.loader-ring').style.display='none'});
+})();
+</script>
+</body>
+</html>
