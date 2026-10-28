@@ -63,7 +63,89 @@ Embedding'leri yorumlarla birleştirirken yalnızca satır sayılarına güvenme
 
 Bu kontroller başarısız olursa veriyi sessizce eşleştirmek yerine üretim durdurulmalı ve kaynak dosyaların sırası ile sürümü yeniden incelenmelidir.
 
-## 4. Üç boyutlu koordinatların üretilmesi
+## 4. Kullanılan AI modelleri ve analiz metotları
+
+Bu bölüm, analiz hattında gerçekten kullanılan modeli, model çıktılarının nasıl kümelendiğini ve temaların nasıl betimlenip adlandırıldığını ayırır. Böylece embedding modeli ile kümeleme algoritmasının farklı görevler yaptığı net kalır.
+
+### 4.1. Metin embedding modeli: multilingual MiniLM
+
+**Model kimliği:** [`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
+
+Yorum metinlerini sayısal anlamsal vektörlere dönüştürmek için Sentence-Transformers kütüphanesi üzerinden çok dilli MiniLM tabanlı cümle embedding modeli kullanıldı. Model kartı, 50 dil için kullanılabildiğini ve her metni 384 boyutlu yoğun bir vektörle temsil ettiğini belirtir. Model mimarisi en fazla 128 tokenlık girdiyi işler ve token temsillerini mean pooling ile cümle vektörüne toplar.
+
+Üretim hattındaki uygulama ayrıntıları:
+
+- **Tam model kimliği:** `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
+- **Yerel model revizyonu:** `e8f8c211226b894fcb81acc59f3b34ba3efd5f42` (kaynak script'te sabitlenmiş Hugging Face snapshot dizini)
+- **Vektör boyutu:** 384 (`float32`)
+- **Çağrı:** `SentenceTransformer.encode(..., batch_size=32, convert_to_numpy=True, normalize_embeddings=True)`
+- **İşleme düzeni:** metinler 8.192 kayıtlık parçalarda işlenir; her parçada model batch boyutu 32'dir. Model bellekteki CUDA GPU varsa onu, yoksa CPU'yu kullanır.
+- **Normalizasyon:** embedding vektörleri `normalize_embeddings=True` ile birim uzunluğa normalize edilir.
+- **Model eğitimi:** proje verisi üzerinde model fine-tuning yapılmaz; mevcut model çıkarım için kullanılır.
+
+Tam korpus aşamasında 373.298 kullanılabilir yorum kaydı 371.371 farklı normalize edilmiş metne karşılık geliyordu. Yinelenen normalize metinlerin embedding'i bir kez hesaplanır; bu metni kullanan birden fazla yorum kaydının adetleri ve kayıt bilgileri analizlerde ayrı ayrı korunur.
+
+### 4.2. Konu kümeleri: MiniBatch K-Means
+
+Embedding üretimi ile konu kümelemesi birbirinden ayrı aşamalardır. Embedding modeli metinleri vektörleştirir; **MiniBatchKMeans** bu vektörleri önceden belirlenen küme sayısına göre gruplar. Büyük korpus üzerinde MiniBatch K-Means, tüm vektörleri her adımda birlikte işleyen klasik K-Means'e göre daha yönetilebilir mini-batch'lerle çalıştığı için tercih edilmiştir.
+
+| Analiz aşaması | Kullanılan vektörler | Algoritma | Küme sayısı |
+|---|---|---|---:|
+| Tam korpus (Phase 7) | Tüm kullanılabilir farklı metinlerin MiniLM embedding'leri | `MiniBatchKMeans` | 12 |
+| Düşük puanlı alt küme (Phase 8) | Tam korpusta önceden hesaplanmış embedding'lerden 1–2 yıldızlı metinlere karşılık gelenler | `MiniBatchKMeans` | 8 |
+| Önceki keşif denemeleri | MiniLM embedding'leri; ayrıca TF-IDF tabanlı başlangıç karşılaştırması | `KMeans` / `MiniBatchKMeans` | Denemeye göre 8 veya 12 |
+
+Tam korpus ve düşük puan alt kümesi için kullanılan MiniBatchKMeans ayarları:
+
+| Parametre | Değer |
+|---|---:|
+| `random_state` | 42 |
+| `n_init` | 3 |
+| `batch_size` | 8.192 |
+| `max_iter` | 100 |
+| `max_no_improvement` | 20 |
+| `reassignment_ratio` | 0.01 |
+
+Phase 8, embedding modelini ikinci kez çalıştırmaz: tam korpus embedding matrisi ve SHA-256 ile doğrulanmış normalize metin listesi üzerinden 119.206 düşük puanlı benzersiz metne ait vektörler seçilir; sekiz kümeli model bu alt küme üzerinde ayrı eğitilir. Bu nedenle tam korpusun 12 kümesi ile düşük puan alt kümesinin 8 kümesindeki **küme numaraları birbirine karşılık gelen ortak sınıf kimlikleri değildir**.
+
+Küme sayıları keşif amacıyla belirlenmiştir. Mevcut çıktı özetlerinde model seçimi/küme sayısı için sistematik bir optimizasyon veya tüm küme etiketleri için tamamlanmış insan doğrulaması raporlanmamaktadır. Küme üyeliği, tek başına klinik olarak doğrulanmış konu sınıfı anlamına gelmez.
+
+### 4.3. Küme betimleyicileri: TF-IDF
+
+TF-IDF, ana küme atamasını yapan algoritma değildir. Kümeleme tamamlandıktan sonra her grupta öne çıkan kelimeleri ve iki kelimeli ifadeleri çıkarmak, böylece kümeleri yorumlamaya yardımcı olmak için kullanılır.
+
+- **Özellikler:** tekli ve ikili kelime öbekleri (`ngram_range=(1, 2)`).
+- **Ön işleme:** küçük harfe çevirme ve projede tanımlanmış Türkçe durak kelime listesi.
+- **Tam korpus ayarları:** `min_df=20`, `max_df=0.8`, `max_features=60000`, `sublinear_tf=True`.
+- **1–2 yıldız alt kümesi ayarları:** `min_df=10`, `max_df=0.8`, `max_features=60000`, `sublinear_tf=True`.
+- **Küme özeti:** her kümenin içindeki dokümanların TF-IDF değerleri özellik bazında ortalanır; tam korpusta ilk 18, düşük puan alt kümesinde ilk 20 terim kaydedilir.
+
+Bu terimler otomatik konu atamasının bağımsız kanıtı değil, küme yorumlama araçlarıdır. Sık geçen kelimeler tek başına kümenin tutarlı olduğu anlamına gelmez.
+
+### 4.4. İnsan tarafından tanımlanmış geçici tema isimleri
+
+Küme numaralarından okunabilir tema başlıklarına geçiş, `phase9_finalize_full_analysis.py` içinde tanımlanmış etiket sözlükleriyle yapılır. Script her başlık için bir güven seviyesi ve gerekçe de ekler; çıktıdaki doğrulama durumu açıkça **“GEÇİCİ — insan değerlendirmesi gerekiyor”** olarak işaretlenmiştir. Analiz özetleri de tema etiketlerinin insan tarafından tam doğrulanmadığını belirtir.
+
+Bu nedenle nihai başlıkları üreten bir GPT/Claude/Gemini çağrısı bu ana konu analizi ve atlas üretim hattının parçası değildir. Model, kümeleri oluşturmak için embedding ve kümeleme aşamalarında kullanılır; okunabilir etiketler script'teki tanımlı eşlemelerden gelir ve uzman/insan incelemesine açıktır. Proje genelindeki geçmiş manuel araştırma adımlarıyla bu otomatik konu kümeleme hattını birbirine karıştırmamak gerekir.
+
+### 4.5. Diğer analiz ve kalite kontrol metotları
+
+- **Kapsam filtresi:** DuckDB SQL ile kategori, geçerli tarih, puan ve minimum metin uzunluğu koşulları uygulanır; tesis kimliği ve kayıt alanları Parquet kaynağından okunur.
+- **Metin normalizasyonu:** Unicode NFKC, küçük harfe çevirme ve ardışık boşlukları tek boşluğa indirgeme. Benzersiz normalize metin listesi sıralanır.
+- **Embedding eşleştirmesi:** metin sayısı, 384 boyutlu matris şekli ve SHA-256 korpus hash'i doğrulanır; düşük puan alt kümesinin vektörleri eşleşen metin üzerinden seçilir.
+- **Trend hesapları:** yıl, şehir/eşleşme güven düzeyi ve tema bazında kayıt adetleri ile paylar gruplanarak hesaplanır. Paylar ilgili tabloda belirtilen payda üzerinden okunmalıdır; son yıl kısmi yıl olabilir.
+- **Tesis ve şehir eşleştirmesi:** son atlas üretimi tesis kimliği üzerinden Phase 29 kimlik/kapsam tablosunu kullanır ve etkin şehir alanı yoksa mevcut yedek alanına döner. Bu, MiniLM'in konum tahmini yaptığı anlamına gelmez.
+- **3B indirgeme:** düşük puanlı benzersiz metin embedding'leri UMAP ile üç boyuta indirgenir. Kullanılan bütün UMAP parametreleri bir sonraki bölümde verilmiştir.
+
+### 4.6. Model ve yöntem kaynakları
+
+- [MiniLM model kartı — mimari, dil kapsamı ve 384 boyutlu embedding'ler](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
+- [Sentence-BERT makalesi — cümle embedding yaklaşımının temel yayını](https://arxiv.org/abs/1908.10084)
+- [scikit-learn MiniBatchKMeans belgeleri](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html)
+- [scikit-learn TfidfVectorizer belgeleri](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html)
+- [UMAP parametreleri ve davranışı](https://umap-learn.readthedocs.io/en/latest/parameters.html)
+
+## 5. Üç boyutlu koordinatların üretilmesi
 
 Kaynak embedding'leri 384 boyutludur. Bunlar, yorumlar arasındaki anlamsal yakınlığı keşif amaçlı incelemeye elverişli bir gösterime dönüştürmek için UMAP ile üç boyuta indirgenir.
 
@@ -90,7 +172,7 @@ Aynı parametreler, aynı embedding matrisi ve uyumlu bağımlılık sürümleri
 - Tema kimlikleri, mevcut tema analizinden gelir. Etiketler veri incelemesini kolaylaştırır ancak insan doğrulaması olmadan kesin sınıflar olarak kabul edilmemelidir.
 - Aynı normalize edilmiş metne ait kayıtlar aynı koordinatı paylaşabilir. Bu, kayıtların paket dışına çıkarıldığı anlamına gelmez.
 
-## 5. Çıktı paketi
+## 6. Çıktı paketi
 
 Üretim script'i şu dosyayı oluşturur:
 
@@ -114,7 +196,7 @@ Her nokta kaydı aşağıdaki sırada alanlar içerir:
 
 Tema, şehir ve tesis gibi tekrarlanan alanlar paket içinde sözlük/indeks yapılarıyla temsil edilebilir; kayıt alanlarındaki kimlikler bu eşlemelerle birlikte okunmalıdır. Şema değişikliği yapılırsa bu belge ve paketi okuyan tüketiciler birlikte güncellenmelidir.
 
-## 6. Üretim script'i ve yeniden üretilebilirlik
+## 7. Üretim script'i ve yeniden üretilebilirlik
 
 Veri paketini üreten script yerel analiz çalışma alanındadır:
 
@@ -133,7 +215,7 @@ Yeniden üretilebilirliği iyileştirmek için önerilen işler:
 - Filtreleme, satır sırası doğrulaması, şehir eşleştirmesi ve çıktı şeması için otomatik kontroller eklemek.
 - Hassas veya büyük kaynak verileri Git'e eklemeden, erişim ve saklama kurallarını ayrı yönetmek.
 
-## 7. Sınırlamalar ve yorumlama ilkeleri
+## 8. Sınırlamalar ve yorumlama ilkeleri
 
 - **Seçilim yanlılığı:** Veri yalnızca belirli koşulları sağlayan 1–2 yıldızlı hastane yorumlarından oluşur. Genel memnuniyet oranı çıkarmak için tek başına kullanılamaz.
 - **Eksik eşleştirmeler:** Bazı kayıtlarda şehir veya tesis metadata'sı bulunmayabilir ya da belirsiz olabilir.
@@ -142,7 +224,7 @@ Yeniden üretilebilirliği iyileştirmek için önerilen işler:
 - **Nedensellik:** Koordinat yakınlığı, ortak tema veya yorum sayısı tek başına belirli bir sorunun nedenini kanıtlamaz.
 - **Gizlilik:** Yorum metinlerinin doğrudan içermediği hâlde kişileri veya olayları tanımlamaya yarayabilecek bağlamsal bilgiler bulunabilir. Paylaşım öncesi ayrı bir gizlilik değerlendirmesi yapılmalıdır.
 
-## 8. Depo içeriği
+## 9. Depo içeriği
 
     atlas-local/
     ├── .gitignore
