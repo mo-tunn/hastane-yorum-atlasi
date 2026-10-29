@@ -19,3 +19,13 @@
 @media(max-width:900px){.topbar{height:auto;min-height:58px;flex-wrap:wrap;gap:8px;padding:10px 16px}.page-nav{order:3;width:100%;justify-content:center;margin:0}.topright{margin-left:auto}}
 @media(max-width:480px){.topbar{padding:10px;gap:8px}.brand{font-size:12px;gap:7px}.brand-mark{width:28px;height:28px}.topright{gap:5px}.topright .count-badge{display:none}.social-links{gap:5px}.social-link{width:34px;min-height:34px;height:34px;padding:0}.social-link span{display:none}.page-link{padding:0 10px}}
 @media(prefers-reduced-motion:reduce){.page-link,.social-link{transition:none}}
+
+
+/* Shared source, methodology and privacy note. */
+.source-disclosure{margin:22px auto 0;padding:18px 20px;border:1px solid #e7e9ee;border-radius:12px;background:#fff;color:#68717e;font-size:11px;line-height:1.75}
+.source-disclosure h2{margin:0 0 9px;color:#303743;font-size:13px;line-height:1.4;font-weight:750;letter-spacing:-.015em}
+.source-disclosure p{margin:7px 0}
+.source-disclosure strong{color:#3b4350;font-weight:750}
+.source-disclosure a{color:#4c57c4;text-decoration:underline;text-underline-offset:2px}
+.source-disclosure a:hover{color:#313da7}
+@media(max-width:600px){.source-disclosure{margin-top:16px;padding:14px;font-size:11px}.source-disclosure h2{font-size:12px}}

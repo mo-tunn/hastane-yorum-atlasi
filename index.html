@@ -30,7 +30,7 @@ main{padding:16px 20px 22px;max-width:1900px;margin:auto}.toolbar{display:flex;a
  <div class="control city-control"><label for="citySelect">&#350;ehir</label><select id="citySelect"><option value="-1">T&#252;m &#351;ehirler</option></select></div>
  <div class="control year-control"><label for="yearSelect">Y&#305;l</label><select id="yearSelect"><option value="-1">T&#252;m y&#305;llar</option></select></div>
  <div class="control rating-control"><label for="ratingSelect">Puan</label><select id="ratingSelect"><option value="0">1&#8211;2 y&#305;ld&#305;z</option><option value="1">Sadece 1 y&#305;ld&#305;z</option><option value="2">Sadece 2 y&#305;ld&#305;z</option></select></div>
- <div class="control search-control"><input class="search-input" id="textSearch" type="search" placeholder="Yorum veya hastane ara&#8230;" aria-label="Yorum veya hastane ara"></div>
+ <div class="control search-control"><input class="search-input" id="textSearch" type="search" placeholder="Hastane/tesis ara…" aria-label="Hastane veya tesis adı ara"></div>
  <button class="small-btn" id="resetView" type="button">S&#305;f&#305;rla</button><span class="filter-count" id="filterCount">119.427 yorum</span>
 </section>
 <section class="workspace">
@@ -49,6 +49,15 @@ main{padding:16px 20px 22px;max-width:1900px;margin:auto}.toolbar{display:flex;a
    <div class="metric-row"><span>&#350;ehir</span><strong id="detailCity">&#8212;</strong></div><div class="metric-row"><span>Tarih</span><strong id="detailDate">&#8212;</strong></div><div class="metric-row"><span>Y&#305;ld&#305;z</span><strong id="detailRating">&#8212;</strong></div>
   </div>
  </aside>
+</section>
+
+<section class="source-disclosure" aria-labelledby="sourceDisclosureTitle">
+  <h2 id="sourceDisclosureTitle">Veri kaynağı, yöntem ve kullanım notu</h2>
+  <p><strong>Veri kaynağı:</strong> Bu çalışma, <a href="https://huggingface.co/datasets/opdullah/turkish-google-maps-15M" target="_blank" rel="noopener noreferrer">Turkish Google Maps 15M</a> veri setinden türetilen kayıtları kullanır. Veriler filtrelenerek Türkiye içindeki hastanelere ait 1 ve 2 yıldızlı yorumlarla sınırlandırılmıştır.</p>
+  <p><strong>Yorumcu kimliği ve metinler:</strong> Bu sitede yorum yapan kişilerin profil adları veya kullanıcı kimlikleri ayrı alanlar olarak yayımlanmaz. Bir nokta seçildiğinde yorum metni; mevcutsa puan, tarih, şehir, tesis adı ve analiz temasıyla birlikte gösterilir. Bununla birlikte yorum metninin içinde kullanıcıların yazdığı kişi isimleri veya kişisel/hassas ayrıntılar bulunabilir; tüm metinlerin bu tür ayrıntılardan tamamen arındırıldığı garanti edilmez.</p>
+  <p><strong>Analizin sınırları:</strong> Atlas yalnızca seçilmiş 1 ve 2 yıldızlı yorumları inceler. Bu kayıtlar tüm hasta deneyimlerini temsil etmez; tema grupları ve 3B yakınlıklar keşif amaçlı analiz çıktılarıdır. Yorumlardaki iddialar bağımsız olarak doğrulanmamıştır ve sonuçlar resmî bir hastane kalite sıralaması değildir.</p>
+  <p><strong>Bağımsız proje ve sorumluluk notu:</strong> Bu, kişisel portföy ve araştırma amaçlı bağımsız bir veri bilimi projesidir; Google, Google Maps veya adı geçen sağlık kuruluşları tarafından işletilmez ya da onaylandığı anlamına gelmez. İçerikler üçüncü taraf kullanıcıların görüşlerinden türetilmiştir. Bu açıklama, kaynak veri setinin kullanım koşullarının, üçüncü taraf haklarının veya geçerli mevzuattan doğan yükümlülüklerin yerine geçmez ya da bunları ortadan kaldırmaz.</p>
+  <p><strong>Bildirimler:</strong> Veri kaynağı, gizlilik veya içerik kaldırma talepleri için <a href="https://www.linkedin.com/in/metehan-kizilcik/" target="_blank" rel="noopener noreferrer">proje sahibiyle LinkedIn üzerinden</a> iletişime geçilebilir.</p>
 </section>
 </main>
 <script>
@@ -124,8 +133,8 @@ function drawHighlight(i,isSelected){
  emit(isSelected?19:14,[0.98,0.99,1.0],2);
  emit(isSelected?5.2:4.1,[1.0,1.0,1.0],1);
 }
-function rebuildVisible(){if(!data)return;const ids=[],topicCounts=new Uint32Array(topics.length),terms=searchTerm?searchTerm.toLocaleLowerCase('tr-TR'):'';let baseN=0;for(let i=0;i<points.length;i++){const p=points[i];if(cityFilter>=0&&p[4]!==cityFilter)continue;if(yearFilter>=0&&reviewYears[i]!==yearFilter)continue;if(ratingFilter>0&&p[5]!==ratingFilter)continue;if(terms&&!String(p[8]).toLocaleLowerCase('tr-TR').includes(terms)&&!(places[p[7]]?.name||'').toLocaleLowerCase('tr-TR').includes(terms))continue;baseN++;if(p[3]>=0&&p[3]<topicCounts.length)topicCounts[p[3]]++;if(topicFilter>=0&&p[3]!==topicFilter)continue;ids.push(i)}visible=Int32Array.from(ids);visibleN=visible.length;makeBuffers();if(hoveredPoint>=0&&!isVisible(hoveredPoint))hoveredPoint=-1;renderFilters(topicCounts,baseN);draw();if(selectedPoint>=0&&!isVisible(selectedPoint)){selectedPoint=-1;showDefaultDetail()}}
-function isVisible(i){const p=points[i];return(cityFilter<0||p[4]===cityFilter)&&(yearFilter<0||reviewYears[i]===yearFilter)&&(topicFilter<0||p[3]===topicFilter)&&(!ratingFilter||p[5]===ratingFilter)&&(!searchTerm||(String(p[8]).toLocaleLowerCase('tr-TR').includes(searchTerm.toLocaleLowerCase('tr-TR'))||(places[p[7]]?.name||'').toLocaleLowerCase('tr-TR').includes(searchTerm.toLocaleLowerCase('tr-TR'))))}
+function rebuildVisible(){if(!data)return;const ids=[],topicCounts=new Uint32Array(topics.length),terms=searchTerm?searchTerm.toLocaleLowerCase('tr-TR'):'';let baseN=0;for(let i=0;i<points.length;i++){const p=points[i];if(cityFilter>=0&&p[4]!==cityFilter)continue;if(yearFilter>=0&&reviewYears[i]!==yearFilter)continue;if(ratingFilter>0&&p[5]!==ratingFilter)continue;if(terms&&!(places[p[7]]?.name||'').toLocaleLowerCase('tr-TR').includes(terms))continue;baseN++;if(p[3]>=0&&p[3]<topicCounts.length)topicCounts[p[3]]++;if(topicFilter>=0&&p[3]!==topicFilter)continue;ids.push(i)}visible=Int32Array.from(ids);visibleN=visible.length;makeBuffers();if(hoveredPoint>=0&&!isVisible(hoveredPoint))hoveredPoint=-1;renderFilters(topicCounts,baseN);draw();if(selectedPoint>=0&&!isVisible(selectedPoint)){selectedPoint=-1;showDefaultDetail()}}
+function isVisible(i){const p=points[i];return(cityFilter<0||p[4]===cityFilter)&&(yearFilter<0||reviewYears[i]===yearFilter)&&(topicFilter<0||p[3]===topicFilter)&&(!ratingFilter||p[5]===ratingFilter)&&(!searchTerm||(places[p[7]]?.name||'').toLocaleLowerCase('tr-TR').includes(searchTerm.toLocaleLowerCase('tr-TR')))}
 function renderFilters(topicCounts,baseN){if(topicCounts){renderFilters.lastCounts=topicCounts;renderFilters.lastBaseN=baseN}topicCounts=topicCounts||renderFilters.lastCounts||new Uint32Array(topics.length);baseN=baseN??renderFilters.lastBaseN??points.length;
  $('topicLegend').querySelectorAll('[data-topic]').forEach(b=>{const id=Number(b.dataset.topic);b.setAttribute('aria-pressed',String(id===topicFilter));const count=id<0?baseN:(topicCounts[id]||0),share=baseN?count/baseN*100:0,small=b.querySelector('small');if(small)small.textContent=compact(count)+' · %'+share.toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1})});
  $('filterCount').textContent=compact(visibleN)+' / '+compact(points.length);$('visibleMetric').textContent=compact(visibleN);
@@ -133,13 +142,30 @@ function renderFilters(topicCounts,baseN){if(topicCounts){renderFilters.lastCoun
  $('zoomMetric').textContent=Math.round(zoom*100)+'%';$('visibleSummary').innerHTML='<strong>'+compact(visibleN)+'</strong> / '+compact(points.length)+' yorum';
 }
 function nearestAt(x,y){const gx=Math.floor(x/gridCell),gy=Math.floor(y/gridCell);let best=-1,bd=19*19,bdepth=Infinity;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const a=spatial.get((gy+dy)*gridCols+(gx+dx));if(!a)continue;for(const i of a){const dx=screenXY[i*2]-x,dy=screenXY[i*2+1]-y,d=dx*dx+dy*dy,dep=screenDepth[i];if(d<bd||(d===bd&&dep<bdepth)){bd=d;best=i;bdepth=dep}}}return best}
-function showPoint(i){if(i<0||!points[i])return;selectedPoint=i;const p=points[i],place=places[p[7]]||{name:'Tesis bilgisi yok'},city=cities[p[4]]?.name||CITY_UNKNOWN,topic=topics[p[3]];$('detailKicker').textContent='YORUM KAYDI';$('detailTitle').textContent=topic.label;$('detailMeta').innerHTML='<span class="meta-pill rating-pill">'+String.fromCharCode(9733).repeat(p[5])+' &#183; '+p[5]+'/5</span><span class="meta-pill">'+esc(city)+'</span><span class="meta-pill">'+esc(dateFromDay(p[6]))+'</span>';$('detailText').textContent=p[8]||'(Yorum metni yok.)';$('detailPlace').textContent=place.name||'Tesis bilinmiyor';$('detailCluster').textContent=topic.label;$('detailColor').style.background=COLORS[p[3]];$('detailDate').textContent=dateFromDay(p[6]);$('detailCity').textContent=city;$('detailRating').textContent=p[5]+'/5';draw()}
-function showDefaultDetail(){$('detailKicker').textContent='YORUM SE'+U(199,304)+'LMED'+U(304);$('detailTitle').textContent='Yorum ayr'+U(305)+'nt'+U(305)+'s'+U(305);$('detailMeta').innerHTML='<span class="meta-pill">Bir nokta se&#231;</span>';$('detailText').textContent=DASH;$('detailPlace').textContent=DASH;$('detailCluster').textContent=DASH;$('detailColor').style.background='#8f96a3';$('detailDate').textContent=DASH;$('detailCity').textContent=DASH;$('detailRating').textContent=DASH}
+let detailRequest=0;
+async function showPoint(i){
+ if(i<0||!points[i])return;
+ selectedPoint=i;const requestId=++detailRequest,p=points[i],place=places[p[7]]||{name:'Tesis bilgisi yok'},city=cities[p[4]]?.name||CITY_UNKNOWN,topic=topics[p[3]];
+ $('detailKicker').textContent='YORUM KAYDI';$('detailTitle').textContent=topic.label;
+ $('detailMeta').innerHTML='<span class="meta-pill rating-pill">'+String.fromCharCode(9733).repeat(p[5])+' &#183; '+p[5]+'/5</span><span class="meta-pill">'+esc(city)+'</span><span class="meta-pill">'+esc(dateFromDay(p[6]))+'</span>';
+ $('detailText').textContent='Yorum yükleniyor…';$('detailPlace').textContent=place.name||'Tesis bilinmiyor';$('detailCluster').textContent=topic.label;$('detailColor').style.background=COLORS[p[3]];$('detailDate').textContent=dateFromDay(p[6]);$('detailCity').textContent=city;$('detailRating').textContent=p[5]+'/5';draw();
+ try{
+  const response=await fetch('/api/review?id='+encodeURIComponent(p[8]),{cache:'no-store'});
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Yorum alınamadı');
+  if(requestId!==detailRequest||selectedPoint!==i)return;
+  $('detailText').textContent=typeof result.review==='string'&&result.review?result.review:'(Yorum metni yok.)';
+ }catch(error){
+  if(requestId===detailRequest&&selectedPoint===i)$('detailText').textContent='Yorum yüklenemedi. Lütfen tekrar dene.';
+  console.error('Selected review could not be loaded:',error);
+ }
+}
+function showDefaultDetail(){detailRequest++;$('detailKicker').textContent='YORUM SE'+U(199,304)+'LMED'+U(304);$('detailTitle').textContent='Yorum ayr'+U(305)+'nt'+U(305)+'s'+U(305);$('detailMeta').innerHTML='<span class="meta-pill">Bir nokta se&#231;</span>';$('detailText').textContent=DASH;$('detailPlace').textContent=DASH;$('detailCluster').textContent=DASH;$('detailColor').style.background='#8f96a3';$('detailDate').textContent=DASH;$('detailCity').textContent=DASH;$('detailRating').textContent=DASH}
 function pointerPos(e){const r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]}
 function updateTooltip(i,x,y){
  if(i<0){tooltip.style.display='none';return}
  const p=points[i],place=places[p[7]]||{name:''},topic=topics[p[3]],city=cities[p[4]]?.name||CITY_UNKNOWN;
- tooltip.innerHTML='<strong>'+esc(topic.short)+' '+U(183)+' '+p[5]+'/5</strong>'+esc(place.name)+'<br>'+esc(city)+' '+U(183)+' '+esc(dateFromDay(p[6]))+'<br>'+esc(String(p[8]).slice(0,130))+(String(p[8]).length>130?U(8230):'');
+  tooltip.innerHTML='<strong>'+esc(topic.short)+' '+U(183)+' '+p[5]+'/5</strong>'+esc(place.name)+'<br>'+esc(city)+' '+U(183)+' '+esc(dateFromDay(p[6]))+'<br><span>Yorumu görmek için tıkla</span>';
  tooltip.style.display='block';const tw=tooltip.offsetWidth,th=tooltip.offsetHeight;tooltip.style.left=Math.max(8,Math.min(width-tw-8,x+13))+'px';tooltip.style.top=Math.max(8,Math.min(height-th-8,y+13))+'px';
 }
 function resetView(){zoom=2.6;yaw=.52;pitch=-.2;panX=0;panY=0;cityFilter=-1;yearFilter=-1;ratingFilter=0;topicFilter=-1;searchTerm='';selectedPoint=-1;hoveredPoint=-1;$('citySelect').value='-1';$('yearSelect').value='-1';$('ratingSelect').value='0';$('textSearch').value='';tooltip.style.display='none';showDefaultDetail();rebuildVisible()}

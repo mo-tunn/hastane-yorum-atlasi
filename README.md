@@ -1,10 +1,10 @@
 # Türkiye Hastaneleri Şikayet Atlası — Veri ve Üretim Notları
 
-Bu depo, hastaneler hakkında yazılmış düşük puanlı yorumlardan oluşturulan analiz veri paketini ve bu paketin nasıl üretildiğini açıklayan dokümantasyonu içerir. Paket, her yorum kaydını 384 boyutlu metin embedding'lerinden elde edilen üç boyutlu koordinatlarla ve ilgili tema, şehir, puan, tarih ve tesis bilgileriyle eşleştirir.
+Bu depo, Türkiye'deki hastane yorumları üzerine geliştirilen veri analizi, 3B görselleştirme ve yöntem dokümantasyonunu içerir. Kaynak yorum metinlerini içeren yerel veri paketi ile canlı sitede kullanılan metinsiz genel bakış paketi birbirinden ayrıdır.
 
 **Canlı araştırma aracı:** https://hastane-yorum-atlasi.metekizilcik.workers.dev/
 
-> **Araştırma notu:** Site ve yorum metinleri herkese açıktır. Yorumlar kullanıcılar tarafından yazılmış öznel değerlendirmelerdir; doğrulanmış tıbbi bulgular değildir. Kümeler keşif amaçlıdır, bütün hastane deneyimlerini temsil etmez ve tek başlarına bir tesis hakkında kesin yargı oluşturmak için kullanılmamalıdır.
+> **Araştırma notu:** Canlı sitede yorum metinleri toplu ham veri dosyası olarak yayımlanmaz; seçilen noktanın metni ayrı bir istekle yüklenir. Yorumcu profili adı/kullanıcı kimliği gösterilmez. Yorum metninin kendisi yine de kişisel ayrıntılar içerebilir. Yorumlar öznel kullanıcı görüşleridir; doğrulanmış tıbbi bulgular değildir. Kümeler keşif amaçlıdır ve tüm hasta deneyimlerini temsil etmez.
 
 ## Veri özeti
 
@@ -14,11 +14,11 @@ Bu depo, hastaneler hakkında yazılmış düşük puanlı yorumlardan oluşturu
 - **Embedding boyutu:** 384
 - **Koordinat boyutu:** 3
 - **Koordinat indirgeme yöntemi:** UMAP
-- **Paket:** `review-universe.json.gz` (gzip ile sıkıştırılmış JSON)
+- **Yerel kaynak paketi:** review-universe.json.gz (ham yorum metinleri içerir; public statik varlığa aynen kopyalanmaz)
 
-Kayıt sayısı ile farklı metin sayısı aynı değildir. Farklı kaynak kayıtları aynı normalize edilmiş yorumu içerebilir. Bu kayıtlar veri paketinde ayrı ayrı tutulur; yinelenen metinler aynı anlamsal koordinatı paylaşabilir.
+Kaynak paketinde 119.427 kayıt bulunur; canlı sitede Türkiye dışı şehir kaydı olarak sınıflanan 1.063 kayıt dışarıda bırakılır ve 118.364 kayıt gösterilir. Kayıt sayısı ile farklı normalize edilmiş metin sayısı aynı değildir. Kaynak pakette yinelenen metinler farklı kayıtlar olarak tutulabilir ve aynı anlamsal koordinatı paylaşabilir.
 
-> **Gizlilik:** Veri paketi gerçek yorum metinlerini içerir. Bu nedenle GitHub deposu private tutulur. Depoyu herkese açmadan önce veri paylaşım izinleri, kişisel veri riski ve ilgili yükümlülükler ayrıca değerlendirilmelidir.
+> **Veri dağıtımı ve gizlilik:** Kaynak review-universe.json.gz dosyası ham yorum metinlerini içerdiği için GitHub deposu private tutulur. deploy.ps1, bu kaynak paketi olduğu gibi yayınlamak yerine metinsiz nokta metadata'sı ile yorum metinlerini ayrı parçalara dönüştürür. Parçaların URL'leri Worker tarafından doğrudan isteklerde engellenir; seçilen yorum /api/review uç noktası üzerinden getirilir. Bu düzen ham dosyanın doğrudan yayınlanmasını önler ancak tekil API isteklerinin otomatikleştirilmesini tamamen engellemez; yorum metinleri yine kişisel ayrıntılar içerebilir.
 
 ## 1. Veri kapsamı ve dahil etme kuralları
 
@@ -182,11 +182,13 @@ Aynı parametreler, aynı embedding matrisi ve uyumlu bağımlılık sürümleri
 
     atlas-local/review-universe.json.gz
 
-Dosya gzip ile sıkıştırılmış bir JSON paketidir. Sıkıştırılmış dosyanın boyutu üretim sürümünde yaklaşık 20,3 MB'tır; değişikliklerle bu değer farklılaşabilir.
+Yerel kaynak dosya gzip sıkıştırılmış JSON paketidir ve ham yorum metinlerini içerir. **Bu dosya canlı siteye doğrudan dağıtılmaz.** Canlı site için build-public-data.cjs, nokta metadata'sı ve reviewId içeren küçük dist/review-universe.json.gz dosyasını üretir; yorum metinlerini ise dist/private-reviews/ altında 1.000 kayıtlık gzip parçalarına ayırır.
 
-Her nokta kaydı aşağıdaki sırada alanlar içerir:
+Yerel kaynak pakette her nokta kaydı aşağıdaki sıradadır:
 
     [x, y, z, topicId, cityId, rating, daysSince2000-01-01, placeIndex, reviewText]
+
+Canlı sitede kullanılan metinsiz nokta kaydında son alan reviewText yerine sayısal bir reviewId değeridir:
 
 | Alan | Anlamı |
 |---|---|
@@ -196,15 +198,16 @@ Her nokta kaydı aşağıdaki sırada alanlar içerir:
 | `rating` | Kaydın yıldız puanı |
 | `daysSince2000-01-01` | Tarihin 1 Ocak 2000'e göre gün cinsinden kodlanmış değeri |
 | `placeIndex` | Tesis sözlüğüne işaret eden indeks |
-| `reviewText` | Yorumun metni |
+| reviewText | Yalnızca özel yerel kaynak paketindeki yorum metni; canlı genel bakış varlığında bulunmaz |
+| reviewId | Canlı genel bakış paketinde yorum metnini ayrı istekte bulmak için kullanılan sayısal kimlik |
 
-Tema, şehir ve tesis gibi tekrarlanan alanlar paket içinde sözlük/indeks yapılarıyla temsil edilebilir; kayıt alanlarındaki kimlikler bu eşlemelerle birlikte okunmalıdır. Şema değişikliği yapılırsa bu belge ve paketi okuyan tüketiciler birlikte güncellenmelidir.
+Tema, şehir ve tesis gibi tekrarlanan alanlar paket içinde sözlük/indeks yapılarıyla temsil edilir. Canlı sitedeki reviewId, metinsiz nokta metadata'sını /api/review?id=... uç noktasındaki ilgili metin parçasına bağlar. Bu uç nokta doğrudan ham paket indirmesi sağlamaz; ancak tekil isteklerin otomatikleştirilemeyeceği anlamına da gelmez. Şema değişikliği yapılırsa bu belge ve paketi okuyan tüketiciler birlikte güncellenmelidir.
 
 ## 7. Üretim script'i ve yeniden üretilebilirlik
 
 Veri paketini üreten script yerel analiz çalışma alanındadır:
 
-    C:/Users/metehan/Desktop/review_preanalysis/build_atlas_universe.py
+    yerel analiz çalışma alanındaki build_atlas_universe.py
 
 Bu script, yukarıda listelenen kaynak dosyalara ihtiyaç duyar ve filtreleme, doğrulama, koordinat üretimi, metadata eşleme ve sıkıştırılmış çıktı oluşturma aşamalarını yürütür.
 
@@ -230,7 +233,7 @@ Yeniden üretilebilirliği iyileştirmek için önerilen işler:
 
 ## Yayınlama: Cloudflare Workers
 
-Canlı sürüm, Cloudflare Workers'ın statik varlıkları üzerinden yayınlanır. Yayınlanan klasöre `index.html`, `grafikler.html` ve `review-universe.json.gz` kopyalanır; ham analiz kaynakları ve embedding matrisi yüklenmez. Ana sayfadaki **Embedding Evreni** ve **Grafikler** bağlantıları iki ekran arasında geçiş sağlar. Sıkıştırılmış veri paketi yaklaşık 19,39 MiB'dır; Cloudflare statik varlıklar için tek dosyada 25 MiB sınırı belirtir ([güncel limitler](https://developers.cloudflare.com/workers/platform/limits/)).
+Canlı sürüm Cloudflare Workers statik varlıkları ve bir Worker API üzerinden yayınlanır. deploy.ps1, index.html, grafikler.html, site-nav.css ve favicon.svg dosyalarını dist/ içine kopyalar; ardından build-public-data.cjs metinsiz review-universe.json.gz varlığını ve doğrudan erişimi Worker tarafından engellenen private-reviews/ parçalarını üretir. worker.js, tıklanan noktanın tekil yorum metnini /api/review?id=... uç noktasından döndürür. Ham kaynak paket canlı siteye aynı dosya olarak yüklenmez. Bu yaklaşım toplu ham dosya indirmesini kaldırır, ancak tekil API çağrılarının otomatikleştirilmesini tamamen önlemez.
 
 Wrangler oturumu açılmış makinede proje kökünden yeniden dağıtım yapmak için:
 
@@ -243,10 +246,14 @@ Script gerekli iki dosyayı `dist/` klasörüne kopyalar ve Wrangler ile dağıt
     atlas-local/
     ├── .gitignore
     ├── README.md
+    ├── build-public-data.cjs
     ├── favicon.svg
     ├── grafikler.html
     ├── index.html
     ├── site-nav.css
+    ├── worker.js
+    ├── deploy.ps1
+    ├── wrangler.jsonc
     └── review-universe.json.gz
 
 Bu README yalnızca veri kapsamını, kaynakları, kalite kontrollerini ve üretim yöntemini belgelemeye odaklanır. Kaynak analiz verileri ve embedding'ler bu dosya ağacına dahil değildir.
@@ -255,4 +262,4 @@ Bu README yalnızca veri kapsamını, kaynakları, kalite kontrollerini ve üret
 
 ## Kısa yöntem özeti
 
-Hastane kategorisindeki, geçerli tarihe ve en az 20 karakterlik metne sahip 1–2 yıldızlı yorumlar seçilir; veterinerlik/hayvan ve diş hekimliği kategorileri dışarıda bırakılır. Yorum kayıtları tema metadata'sı ve 384 boyutlu embedding'lerle satır sırası, adet ve hash bilgileri üzerinden doğrulanır. Embedding'ler belirtilen UMAP ayarlarıyla üç boyuta indirgenir; tema, şehir, puan, tarih, tesis referansı ve gerçek yorum metniyle birlikte gzip'li JSON paketine yazılır.
+Hastane kategorisindeki, geçerli tarihe ve en az 20 karakterlik metne sahip 1–2 yıldızlı yorumlar seçilir; veterinerlik/hayvan ve diş hekimliği kategorileri dışarıda bırakılır. Yorum kayıtları tema metadata'sı ve 384 boyutlu embedding'lerle satır sırası, adet ve hash bilgileri üzerinden doğrulanır. Embedding'ler belirtilen UMAP ayarlarıyla üç boyuta indirilir. Ham metinli kaynak paket özel tutulur; canlı siteye metinsiz koordinat/metadata paketi aktarılır ve yorum metni yalnızca seçilen kayıt için Worker API üzerinden getirilir.
