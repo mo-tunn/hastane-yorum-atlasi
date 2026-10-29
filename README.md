@@ -2,6 +2,10 @@
 
 Bu depo, hastaneler hakkında yazılmış düşük puanlı yorumlardan oluşturulan analiz veri paketini ve bu paketin nasıl üretildiğini açıklayan dokümantasyonu içerir. Paket, her yorum kaydını 384 boyutlu metin embedding'lerinden elde edilen üç boyutlu koordinatlarla ve ilgili tema, şehir, puan, tarih ve tesis bilgileriyle eşleştirir.
 
+**Canlı araştırma aracı:** https://hastane-yorum-atlasi.metekizilcik.workers.dev/
+
+> **Araştırma notu:** Site ve yorum metinleri herkese açıktır. Yorumlar kullanıcılar tarafından yazılmış öznel değerlendirmelerdir; doğrulanmış tıbbi bulgular değildir. Kümeler keşif amaçlıdır, bütün hastane deneyimlerini temsil etmez ve tek başlarına bir tesis hakkında kesin yargı oluşturmak için kullanılmamalıdır.
+
 ## Veri özeti
 
 - **Yorum kaydı:** 119.427
@@ -223,6 +227,16 @@ Yeniden üretilebilirliği iyileştirmek için önerilen işler:
 - **UMAP izdüşümü:** Üç boyutlu uzaydaki mesafeler orijinal embedding uzayındaki tüm ilişkileri korumaz. Eksenlerin doğrudan bir yorumu yoktur.
 - **Nedensellik:** Koordinat yakınlığı, ortak tema veya yorum sayısı tek başına belirli bir sorunun nedenini kanıtlamaz.
 - **Gizlilik:** Yorum metinlerinin doğrudan içermediği hâlde kişileri veya olayları tanımlamaya yarayabilecek bağlamsal bilgiler bulunabilir. Paylaşım öncesi ayrı bir gizlilik değerlendirmesi yapılmalıdır.
+
+## Yayınlama: Cloudflare Workers
+
+Canlı sürüm, Cloudflare Workers'ın statik varlıkları üzerinden yayınlanır. Yayınlanan klasöre yalnızca `index.html` ve `review-universe.json.gz` kopyalanır; ham analiz kaynakları ve embedding matrisi yüklenmez. Sıkıştırılmış veri paketi yaklaşık 19,39 MiB'dır; Cloudflare statik varlıklar için tek dosyada 25 MiB sınırı belirtir ([güncel limitler](https://developers.cloudflare.com/workers/platform/limits/)).
+
+Wrangler oturumu açılmış makinede proje kökünden yeniden dağıtım yapmak için:
+
+    .\deploy.ps1
+
+Script gerekli iki dosyayı `dist/` klasörüne kopyalar ve Wrangler ile dağıtım yapar. `dist/` Git'e alınmaz; Wrangler yapılandırması `wrangler.jsonc` içindedir. Site `workers.dev` üzerinde herkese açık olarak sunulur.
 
 ## 9. Depo içeriği
 
