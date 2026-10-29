@@ -1,0 +1,21 @@
+/* Shared site-wide header and navigation, used on both pages. */
+.topbar{height:58px;min-height:58px;display:flex;align-items:center;justify-content:flex-start;gap:0;padding:0 24px;border-bottom:1px solid var(--line);background:#fff}
+.brand{display:flex;align-items:center;gap:11px;flex:none;font-weight:750;font-size:14px;letter-spacing:-.025em;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.brand-mark{width:30px;height:30px;border-radius:9px;border:1px solid #e3e5f4;background:#f4f5fc;color:#5964c8;display:grid;place-items:center;font-size:17px;flex:none}
+.page-nav{display:flex;align-items:center;gap:5px;margin:0 0 0 22px;flex:none}
+.page-link{display:inline-flex;align-items:center;justify-content:center;min-height:35px;padding:0 12px;border:1px solid transparent;border-radius:8px;color:#626b78;text-decoration:none;font-size:11px;font-weight:650;white-space:nowrap;transition:background .14s,border-color .14s,color .14s}
+.page-link:hover{background:#f8f9fb;color:#20242b}
+.page-link.is-active{background:#f1f2fc;border-color:#e1e3f8;color:#4c57c4}
+.page-link:focus-visible,.social-link:focus-visible{outline:2px solid #7b86dd;outline-offset:2px}
+.topright{display:flex;align-items:center;gap:10px;flex:none;margin-left:auto;color:var(--muted);font-size:11px}
+.context{display:none}
+.count-badge{background:#f7f8fa;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-variant-numeric:tabular-nums;color:#303641;font-weight:700;white-space:nowrap}
+.social-links{display:flex;align-items:center;gap:7px}
+.social-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#424955;text-decoration:none;font-size:11px;font-weight:650;white-space:nowrap;transition:background .14s,border-color .14s,color .14s}
+.social-link:hover{background:#f8f9fb;border-color:#cbd0da;color:#20242b}
+.social-link svg{width:15px;height:15px;display:block;flex:none}
+.social-link.linkedin{color:#0a66c2}
+.social-link.linkedin:hover{background:#f2f8fd;border-color:#bdd8f0;color:#084f95}
+@media(max-width:900px){.topbar{height:auto;min-height:58px;flex-wrap:wrap;gap:8px;padding:10px 16px}.page-nav{order:3;width:100%;justify-content:center;margin:0}.topright{margin-left:auto}}
+@media(max-width:480px){.topbar{padding:10px;gap:8px}.brand{font-size:12px;gap:7px}.brand-mark{width:28px;height:28px}.topright{gap:5px}.topright .count-badge{display:none}.social-links{gap:5px}.social-link{width:34px;min-height:34px;height:34px;padding:0}.social-link span{display:none}.page-link{padding:0 10px}}
+@media(prefers-reduced-motion:reduce){.page-link,.social-link{transition:none}}

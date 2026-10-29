@@ -9,6 +9,8 @@ New-Item -ItemType Directory -Force -Path $dist | Out-Null
 
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "index.html") -Destination (Join-Path $dist "index.html") -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "grafikler.html") -Destination (Join-Path $dist "grafikler.html") -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot "site-nav.css") -Destination (Join-Path $dist "site-nav.css") -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot "favicon.svg") -Destination (Join-Path $dist "favicon.svg") -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "review-universe.json.gz") -Destination (Join-Path $dist "review-universe.json.gz") -Force
 
 Write-Host "Deploying static files from: $dist"

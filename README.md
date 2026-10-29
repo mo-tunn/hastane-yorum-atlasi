@@ -243,8 +243,10 @@ Script gerekli iki dosyayı `dist/` klasörüne kopyalar ve Wrangler ile dağıt
     atlas-local/
     ├── .gitignore
     ├── README.md
+    ├── favicon.svg
     ├── grafikler.html
     ├── index.html
+    ├── site-nav.css
     └── review-universe.json.gz
 
 Bu README yalnızca veri kapsamını, kaynakları, kalite kontrollerini ve üretim yöntemini belgelemeye odaklanır. Kaynak analiz verileri ve embedding'ler bu dosya ağacına dahil değildir.
