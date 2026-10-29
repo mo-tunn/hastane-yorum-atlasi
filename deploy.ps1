@@ -8,6 +8,7 @@ $dist = Join-Path $PSScriptRoot "dist"
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
 
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "index.html") -Destination (Join-Path $dist "index.html") -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot "grafikler.html") -Destination (Join-Path $dist "grafikler.html") -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "review-universe.json.gz") -Destination (Join-Path $dist "review-universe.json.gz") -Force
 
 Write-Host "Deploying static files from: $dist"

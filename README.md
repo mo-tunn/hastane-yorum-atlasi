@@ -230,7 +230,7 @@ Yeniden üretilebilirliği iyileştirmek için önerilen işler:
 
 ## Yayınlama: Cloudflare Workers
 
-Canlı sürüm, Cloudflare Workers'ın statik varlıkları üzerinden yayınlanır. Yayınlanan klasöre yalnızca `index.html` ve `review-universe.json.gz` kopyalanır; ham analiz kaynakları ve embedding matrisi yüklenmez. Sıkıştırılmış veri paketi yaklaşık 19,39 MiB'dır; Cloudflare statik varlıklar için tek dosyada 25 MiB sınırı belirtir ([güncel limitler](https://developers.cloudflare.com/workers/platform/limits/)).
+Canlı sürüm, Cloudflare Workers'ın statik varlıkları üzerinden yayınlanır. Yayınlanan klasöre `index.html`, `grafikler.html` ve `review-universe.json.gz` kopyalanır; ham analiz kaynakları ve embedding matrisi yüklenmez. Ana sayfadaki **Embedding Evreni** ve **Grafikler** bağlantıları iki ekran arasında geçiş sağlar. Sıkıştırılmış veri paketi yaklaşık 19,39 MiB'dır; Cloudflare statik varlıklar için tek dosyada 25 MiB sınırı belirtir ([güncel limitler](https://developers.cloudflare.com/workers/platform/limits/)).
 
 Wrangler oturumu açılmış makinede proje kökünden yeniden dağıtım yapmak için:
 
@@ -243,6 +243,7 @@ Script gerekli iki dosyayı `dist/` klasörüne kopyalar ve Wrangler ile dağıt
     atlas-local/
     ├── .gitignore
     ├── README.md
+    ├── grafikler.html
     ├── index.html
     └── review-universe.json.gz
 

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Hastane yorumlarını şehir, yıl, kategori ve puana göre inceleyen etkileşimli grafikler.">
+<title>Grafikler | Hastane Yorum Atlası</title>
+<style>
+:root{color-scheme:light;--ink:#20242b;--muted:#747d89;--line:#e7e9ee;--surface:#fff;--soft:#f8f9fb;--accent:#5865d8;--accent-soft:#f2f3fd}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#f8f9fb;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:13px}
+body{overflow-x:hidden}
+.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 24px;border-bottom:1px solid var(--line);background:#fff}
+.brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:14px;letter-spacing:-.025em;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.brand-mark{width:30px;height:30px;border-radius:9px;border:1px solid #e3e5f4;background:#f4f5fc;color:#5964c8;display:grid;place-items:center;font-size:17px}
+.page-nav{display:flex;align-items:center;gap:5px;margin-right:auto;margin-left:12px}
+.page-link{display:inline-flex;align-items:center;justify-content:center;min-height:35px;padding:0 12px;border:1px solid transparent;border-radius:8px;color:#626b78;text-decoration:none;font-size:11px;font-weight:650;white-space:nowrap}
+.page-link:hover{background:#f8f9fb;color:#20242b}
+.page-link.is-active{background:#f1f2fc;border-color:#e1e3f8;color:#4c57c4}
+.topright{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px}
+.social-links{display:flex;align-items:center;gap:7px}
+.social-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#424955;text-decoration:none;font-size:11px;font-weight:650;white-space:nowrap}
+.social-link:hover{background:#f8f9fb;border-color:#cbd0da;color:#20242b}
+.social-link svg{width:15px;height:15px;display:block;flex:none}
+.social-link.linkedin{color:#0a66c2}
+main{max-width:1540px;margin:auto;padding:28px 26px 38px}
+.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin:4px 0 22px}
+.eyebrow{margin:0 0 10px;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#737c8a}
+h1{margin:0;font-size:clamp(27px,3vw,38px);line-height:1.1;letter-spacing:-.055em;font-weight:760}
+.intro p{max-width:690px;margin:11px 0 0;color:#727b88;font-size:13px;line-height:1.75}
+.data-note{max-width:270px;padding:11px 13px;border-left:2px solid #d4d8f4;color:#78808d;font-size:10px;line-height:1.65}
+.filter-panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px 16px 13px;box-shadow:0 2px 8px #1b243306}
+.filter-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.filter-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#747d89}
+.filter-note{font-size:10px;color:#9aa1ab}
+.filters{display:grid;grid-template-columns:minmax(180px,1.3fr) minmax(130px,.7fr) minmax(210px,1.3fr) minmax(160px,.8fr) auto;gap:10px;align-items:end}
+.control{display:flex;flex-direction:column;gap:7px;min-width:0}
+.control label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#7a828d;font-weight:800}
+.control select{height:38px;min-width:0;width:100%;border:1px solid #dfe3e9;border-radius:8px;background:#fff;color:#303641;padding:0 10px;font:inherit;font-size:11px;outline:none}
+.control select:focus,.reset-btn:focus-visible,.page-link:focus-visible,.social-link:focus-visible{border-color:#8e98de;outline:2px solid #6773d51c;outline-offset:2px}
+.reset-btn{height:38px;border:1px solid #dfe3e9;border-radius:8px;background:#f8f9fb;color:#424955;padding:0 14px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.reset-btn:hover{background:#f0f2f6}
+.filter-status{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid #f0f1f4;font-size:10px;color:#818a97}
+.filter-status strong{color:#333a45;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0 18px}
+.stat-card{padding:16px 17px;background:#fff;border:1px solid var(--line);border-radius:12px;min-width:0}
+.stat-label{color:#7b8491;font-size:9px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+.stat-value{margin-top:9px;font-size:27px;font-weight:760;letter-spacing:-.045em;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat-sub{margin-top:7px;color:#9aa1ab;font-size:10px;line-height:1.5}
+.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+.chart-card{min-width:0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:0 2px 8px #1b243306}
+.chart-card.span-2{grid-column:1 / -1}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:17px 18px 0}
+.chart-head h2{margin:0;font-size:14px;letter-spacing:-.025em;font-weight:750}
+.chart-head p{margin:5px 0 0;color:#929aa5;font-size:10px;line-height:1.5}
+.chart-chip{display:inline-flex;align-items:center;gap:6px;flex:none;padding:5px 8px;border:1px solid #e8eaf0;border-radius:7px;background:#fbfbfd;color:#747d89;font-size:9px;white-space:nowrap}
+.chart-chip i{width:6px;height:6px;border-radius:50%;background:#6c91d5}
+.chart-body{padding:10px 14px 15px;min-width:0}
+.chart-body svg{display:block;width:100%;height:auto;overflow:visible}
+.chart-body.scroll-x{overflow-x:auto}
+.chart-body.scroll-x svg{max-width:none}
+.gridline{stroke:#edf0f4;stroke-width:1}
+.axis-label{fill:#929aa5;font-size:10px}
+.bar-label{fill:#4b535f;font-size:11px}
+.value-label{fill:#4d5663;font-size:10px;font-weight:650}
+.empty-message{padding:54px 18px;text-align:center;color:#9aa1ab;font-size:11px}
+.mini-legend{display:flex;gap:8px 13px;flex-wrap:wrap;padding:8px 5px 2px}
+.mini-legend span{display:inline-flex;align-items:center;gap:6px;font-size:9px;color:#737c89}
+.mini-legend i{width:7px;height:7px;border-radius:2px;flex:none}
+.heatmap-key{display:flex;align-items:center;gap:7px;font-size:9px;color:#8b939e}
+.heatmap-gradient{width:78px;height:7px;border-radius:10px;background:linear-gradient(90deg,#f1f2f6,#5865d8)}
+.disclaimer{margin:17px 2px 0;color:#969da7;font-size:10px;line-height:1.7}
+.loading-card{margin-top:14px;padding:48px 20px;border:1px solid var(--line);border-radius:13px;background:#fff;text-align:center;color:#78818e}
+.loading-ring{width:25px;height:25px;border:2px solid #e8eaf1;border-top-color:#6672d5;border-radius:50%;margin:0 auto 12px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-card{padding:20px;border:1px solid #f0d8d8;border-radius:10px;background:#fff8f8;color:#9a4242;font-size:12px}
+footer{padding:20px 0 0;color:#9aa1ab;font-size:10px;text-align:center}
+@media(max-width:1050px){main{padding:24px 16px 32px}.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.reset-btn{width:100%}.intro{align-items:flex-start}.data-note{max-width:235px}}
+@media(max-width:760px){.topbar{height:auto;min-height:58px;flex-wrap:wrap;gap:8px;padding:10px 12px}.page-nav{order:3;width:100%;margin:0;justify-content:center}.topright{margin-left:auto}.intro{display:block}.data-note{max-width:none;margin-top:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-grid{grid-template-columns:minmax(0,1fr)}.chart-card.span-2{grid-column:auto}main{padding:18px 10px 28px}}
+@media(max-width:480px){.brand{font-size:12px;gap:7px}.brand-mark{width:28px;height:28px}.topright{gap:5px}.social-links{gap:5px}.social-link{width:33px;height:33px;min-height:33px;padding:0}.social-link span{display:none}.page-link{padding:0 10px}.filters{grid-template-columns:minmax(0,1fr)}.stats{gap:8px}.stat-card{padding:13px}.stat-value{font-size:23px}.filter-note{display:none}.chart-head{padding:14px 13px 0}.chart-body{padding:8px 7px 12px}}
+@media(prefers-reduced-motion:reduce){.loading-ring{animation:none}}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">&#10038;</span><span>Hastane Yorum Atlası</span></a>
+ <nav class="page-nav" aria-label="Ana gezinme">
+  <a class="page-link" href="./index.html">Embedding Evreni</a>
+  <a class="page-link is-active" href="./grafikler.html" aria-current="page">Grafikler</a>
+ </nav>
+ <div class="topright">
+  <nav class="social-links" aria-label="Sosyal profiller">
+   <a class="social-link" href="https://github.com/mo-tunn/" target="_blank" rel="noopener noreferrer" aria-label="GitHub profili (yeni sekmede açılır)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.5-1.29-1.24-1.63-1.24-1.63-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1 1.71 2.62 1.22 3.26.93.1-.73.4-1.22.71-1.5-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.16-3-.12-.29-.5-1.42.11-2.95 0 0 .95-.3 3.05 1.15a10.6 10.6 0 0 1 5.55 0c2.1-1.45 3.05-1.15 3.05-1.15.61 1.53.23 2.66.11 2.95.72.78 1.16 1.78 1.16 3 0 4.29-2.62 5.24-5.11 5.51.4.35.76 1.03.76 2.08v3.06c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/></svg><span>GitHub</span></a>
+   <a class="social-link linkedin" href="https://www.linkedin.com/in/metehan-kizilcik/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profili (yeni sekmede açılır)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M20.45 2H3.55A1.55 1.55 0 0 0 2 3.55v16.9A1.55 1.55 0 0 0 3.55 22h16.9A1.55 1.55 0 0 0 22 20.45V3.55A1.55 1.55 0 0 0 20.45 2ZM8 19H4.9V9H8ZM6.45 7.63a1.8 1.8 0 1 1 .02-3.6 1.8 1.8 0 0 1-.02 3.6ZM19.1 19H16v-4.87c0-1.16-.02-2.65-1.62-2.65-1.62 0-1.87 1.26-1.87 2.57V19H9.4V9h2.98v1.37h.04a3.27 3.27 0 0 1 2.94-1.62c3.15 0 3.74 2.07 3.74 4.77Z"/></svg><span>LinkedIn</span></a>
+  </nav>
+ </div>
+</header>
+
+<main>
+ <section class="intro">
+  <div><p class="eyebrow">Analitik görünüm / 01</p><h1>Yorum verisine farklı<br> açılardan bak.</h1><p>Şehir, yıl, kategori ve yıldız puanını seç; aşağıdaki grafikler seçili veri kümesine göre birlikte güncellensin. Yorum hacmini, kategori paylarını ve şehirler arasındaki farklılıkları keşfet.</p></div>
+  <div class="data-note">Veri kapsamı: hastane kategorisindeki 1 ve 2 yıldızlı yorumlar. Grafikler kayıt sayılarını gösterir; tüm hasta deneyimlerinin temsili veya neden-sonuç kanıtı olarak değerlendirilmemelidir.</div>
+ </section>
+
+ <section class="filter-panel" aria-label="Grafik filtreleri">
+  <div class="filter-top"><span class="filter-title">Veri filtreleri</span><span class="filter-note">Tüm grafikler aynı filtreleri kullanır</span></div>
+  <div class="filters">
+   <div class="control"><label for="citySelect">Şehir</label><select id="citySelect"><option value="-1">Tüm şehirler</option></select></div>
+   <div class="control"><label for="yearSelect">Yıl</label><select id="yearSelect"><option value="-1">Tüm yıllar</option></select></div>
+   <div class="control"><label for="topicSelect">Kategori</label><select id="topicSelect"><option value="-1">Tüm kategoriler</option></select></div>
+   <div class="control"><label for="ratingSelect">Yıldız puanı</label><select id="ratingSelect"><option value="0">1–2 yıldız</option><option value="1">Yalnızca 1 yıldız</option><option value="2">Yalnızca 2 yıldız</option></select></div>
+   <button class="reset-btn" id="resetFilters" type="button">Filtreleri sıfırla</button>
+  </div>
+  <div class="filter-status"><span id="filterSummary">Veri paketi yükleniyor…</span><span id="datasetSummary"></span></div>
+ </section>
+
+ <section class="stats" aria-label="Filtrelenmiş veri özeti">
+  <article class="stat-card"><div class="stat-label">Eşleşen yorum</div><div class="stat-value" id="statReviews">—</div><div class="stat-sub" id="statReviewsSub">Seçili filtrelerdeki kayıtlar</div></article>
+  <article class="stat-card"><div class="stat-label">Şehir</div><div class="stat-value" id="statCities">—</div><div class="stat-sub">Filtrelenmiş veride bulunan şehirler</div></article>
+  <article class="stat-card"><div class="stat-label">Aktif kategori</div><div class="stat-value" id="statTopics">—</div><div class="stat-sub">En az bir kaydı olan kategori sayısı</div></article>
+  <article class="stat-card"><div class="stat-label">1 yıldız payı</div><div class="stat-value" id="statOneStar">—</div><div class="stat-sub">Filtrelenmiş yorumların içindeki oran</div></article>
+ </section>
+
+ <section class="chart-grid" id="chartGrid" aria-label="Etkileşimli grafikler">
+  <article class="chart-card span-2"><div class="chart-head"><div><h2>Yıllara göre yorum hacmi</h2><p>Her yıldaki kayıt sayısı · eksen, seçili alt kümedeki dağılıma göre ölçeklenir</p></div><span class="chart-chip"><i></i>Yıllık eğilim</span></div><div class="chart-body" id="yearChart"><div class="empty-message">Grafik hazırlanıyor…</div></div></article>
+  <article class="chart-card"><div class="chart-head"><div><h2>Kategori dağılımı</h2><p>Kayıt adedi ve filtrelenmiş veri içindeki payı</p></div></div><div class="chart-body" id="topicChart"><div class="empty-message">Grafik hazırlanıyor…</div></div></article>
+  <article class="chart-card"><div class="chart-head"><div><h2>Şehirlere göre yorum sayısı</h2><p>En fazla kayda sahip ilk 12 şehir</p></div></div><div class="chart-body" id="cityChart"><div class="empty-message">Grafik hazırlanıyor…</div></div></article>
+  <article class="chart-card"><div class="chart-head"><div><h2>Yıldız puanı dağılımı</h2><p>1 ve 2 yıldızlı yorumların karşılaştırması</p></div></div><div class="chart-body" id="ratingChart"><div class="empty-message">Grafik hazırlanıyor…</div></div></article>
+  <article class="chart-card"><div class="chart-head"><div><h2>Şehirlerin kategori profili</h2><p>En çok yorum içeren şehirlerde kategorilerin adet bazında bileşimi</p></div></div><div class="chart-body" id="cityTopicChart"><div class="empty-message">Grafik hazırlanıyor…</div></div></article>
+  <article class="chart-card span-2"><div class="chart-head"><div><h2>Yıl × kategori ısı haritası</h2><p>Hücre koyulaştıkça o yıl ve kategorideki yorum sayısı artar</p></div><div class="heatmap-key"><span>Düşük</span><span class="heatmap-gradient" aria-hidden="true"></span><span>Yüksek</span></div></div><div class="chart-body scroll-x" id="heatmapChart"><div class="empty-message">Grafik hazırlanıyor…</div></div></article>
+ </section>
+ <p class="disclaimer">Not: Yorum kayıtları, normalize edilmiş metin sayısından farklı olabilir. Aynı yorum metni birden fazla kayıtta bulunabilir. Kategoriler keşif amaçlı gruplardır ve tek başlarına bir hastane hakkında kesin yargı oluşturmaz.</p>
+ <footer>Hastane Yorum Atlası · Etkileşimli grafikler</footer>
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const COLORS=['#6c91d5','#d7a456','#9882d4','#65b69b','#dc8a83','#b3a65e','#54b8b2','#cf87ae'];
+const fmt=n=>Number(n||0).toLocaleString('tr-TR');
+const pct=n=>Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shorten=(s,n=24)=>String(s??'').length>n?String(s).slice(0,n-1)+'…':String(s??'');
+const dayYear=d=>new Date(Date.UTC(2000,0,1)+Number(d)*86400000).getUTCFullYear();
+const NS='http://www.w3.org/2000/svg';
+let data=null,points=[],cities=[],topics=[],reviewYears=new Int16Array(0),allYears=[],cityById=new Map(),topicById=new Map(),renderSequence=0;
+
+function addOption(select,value,label){const option=document.createElement('option');option.value=String(value);option.textContent=label;select.appendChild(option)}
+function populateFilters(){
+ const city=$('citySelect'),year=$('yearSelect'),topic=$('topicSelect');
+ city.innerHTML='';addOption(city,-1,'Tüm şehirler');
+ cities.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),'tr')).forEach(c=>addOption(city,c.id,c.name+' · '+fmt(c.count)));
+ year.innerHTML='';addOption(year,-1,'Tüm yıllar');
+ const counts=new Map();for(const y of reviewYears)counts.set(y,(counts.get(y)||0)+1);
+ allYears=Array.from(counts.keys()).filter(y=>y>0).sort((a,b)=>a-b);
+ allYears.slice().sort((a,b)=>b-a).forEach(y=>addOption(year,y,y+' · '+fmt(counts.get(y))));
+ topic.innerHTML='';addOption(topic,-1,'Tüm kategoriler');
+ topics.slice().sort((a,b)=>Number(a.id)-Number(b.id)).forEach(t=>addOption(topic,t.id,t.label||t.short||('Kategori '+t.id)));
+}
+function currentFilters(){return{city:Number($('citySelect').value),year:Number($('yearSelect').value),topic:Number($('topicSelect').value),rating:Number($('ratingSelect').value)}}
+function filteredStats(){
+ const f=currentFilters(),s={ids:[],years:new Map(),topics:new Map(),cities:new Map(),ratings:new Map(),cityTopics:new Map(),yearTopics:new Map(),citySet:new Set()};
+ for(let i=0;i<points.length;i++){
+  const p=points[i],city=Number(p[4]),topic=Number(p[3]),rating=Number(p[5]),year=reviewYears[i];
+  if(f.city>=0&&city!==f.city)continue;
+  if(f.year>=0&&year!==f.year)continue;
+  if(f.topic>=0&&topic!==f.topic)continue;
+  if(f.rating>0&&rating!==f.rating)continue;
+  s.ids.push(i);s.years.set(year,(s.years.get(year)||0)+1);s.topics.set(topic,(s.topics.get(topic)||0)+1);
+  s.cities.set(city,(s.cities.get(city)||0)+1);s.ratings.set(rating,(s.ratings.get(rating)||0)+1);
+  if(city>=0)s.citySet.add(city);
+  if(!s.cityTopics.has(city))s.cityTopics.set(city,new Map());
+  const ct=s.cityTopics.get(city);ct.set(topic,(ct.get(topic)||0)+1);
+  const ky=year+'|'+topic;s.yearTopics.set(ky,(s.yearTopics.get(ky)||0)+1);
+ }
+ return s;
+}
+function svgStart(w,h,label){return '<svg xmlns="'+NS+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+esc(label)+'" focusable="false">'}
+function emptySvg(msg){return '<div class="empty-message">'+esc(msg)+'</div>'}
+function renderYearChart(s){
+ const years=Array.from(s.years.keys()).filter(y=>y>0).sort((a,b)=>a-b);
+ if(!years.length)return emptySvg('Bu filtrelerle eşleşen yıllık kayıt bulunamadı.');
+ const w=940,h=290,m={l:60,r:18,t:18,b:46},pw=w-m.l-m.r,ph=h-m.t-m.b,max=Math.max(1,...years.map(y=>s.years.get(y))),nice=Math.pow(10,Math.floor(Math.log10(max))),step=Math.max(1,Math.ceil(max/(nice*4))*nice/4),top=Math.ceil(max/step)*step;
+ let out=svgStart(w,h,'Yıllara göre yorum sayısı');
+ for(let k=0;k<=4;k++){const value=top*k/4,y=m.t+ph-(value/top)*ph;out+='<line class="gridline" x1="'+m.l+'" y1="'+y+'" x2="'+(w-m.r)+'" y2="'+y+'"/><text class="axis-label" x="'+(m.l-9)+'" y="'+(y+3)+'" text-anchor="end">'+fmt(Math.round(value))+'</text>'}
+ const band=pw/years.length,bw=Math.max(3,Math.min(30,band*.62));
+ years.forEach((year,i)=>{const val=s.years.get(year),bh=val/top*ph,x=m.l+i*band+(band-bw)/2,y=m.t+ph-bh;out+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,bh).toFixed(1)+'" rx="3" fill="#6c91d5"><title>'+year+': '+fmt(val)+' yorum</title></rect><text class="axis-label" x="'+(m.l+i*band+band/2).toFixed(1)+'" y="'+(h-17)+'" text-anchor="middle">'+year+'</text>'});
+ out+='</svg>';$('yearChart').innerHTML=out;
+}
+function renderHorizontal(target,items,total,colorFn,emptyText){
+ if(!items.length){$(target).innerHTML=emptySvg(emptyText||'Bu filtrelerle eşleşen kayıt bulunamadı.');return}
+ const w=900,row=35,m={l:190,r:112,t:8,b:12},h=m.t+m.b+row*items.length,pw=w-m.l-m.r,max=Math.max(1,...items.map(x=>x.count));
+ let out=svgStart(w,h,'Yatay kategori ve şehir karşılaştırması');
+ items.forEach((item,i)=>{const y=m.t+i*row+row/2,len=item.count/max*pw,share=total?item.count/total*100:0,col=colorFn(item,i);out+='<text class="bar-label" x="'+(m.l-12)+'" y="'+(y+4)+'" text-anchor="end">'+esc(shorten(item.label,27))+'</text><line class="gridline" x1="'+m.l+'" y1="'+(y+10)+'" x2="'+(w-m.r)+'" y2="'+(y+10)+'"/><rect x="'+m.l+'" y="'+(y-7)+'" width="'+Math.max(0,len).toFixed(1)+'" height="14" rx="4" fill="'+col+'" opacity="'+(item.count?'.92':'.15')+'"><title>'+esc(item.label)+': '+fmt(item.count)+' yorum</title></rect><text class="value-label" x="'+(w-m.r+10)+'" y="'+(y+3)+'">'+fmt(item.count)+' · '+pct(share)+'</text>'});
+ out+='</svg>';$ (target).innerHTML=out;
+}
+function renderTopicChart(s){
+ const items=topics.slice().sort((a,b)=>Number(a.id)-Number(b.id)).map((t,i)=>({id:Number(t.id),label:t.short||t.label||'Kategori '+t.id,count:s.topics.get(Number(t.id))||0}));
+ renderHorizontal('topicChart',items,s.ids.length,(item)=>COLORS[(item.id>=0?item.id:0)%COLORS.length],'Bu filtrelerle eşleşen kategori bulunamadı.');
+}
+function renderCityChart(s){
+ const items=Array.from(s.cities.entries()).map(([id,count])=>({id,label:id<0?'Şehir bilinmiyor':(cityById.get(Number(id))||'Şehir '+id),count})).sort((a,b)=>b.count-a.count).slice(0,12);
+ renderHorizontal('cityChart',items,s.ids.length,(item)=>'#8a94a8','Bu filtrelerle eşleşen şehir bulunamadı.');
+}
+function renderRatingChart(s){
+ const items=[{label:'1 yıldız',count:s.ratings.get(1)||0,color:'#d7a456'},{label:'2 yıldız',count:s.ratings.get(2)||0,color:'#6c91d5'}];
+ renderHorizontal('ratingChart',items,s.ids.length,(item)=>item.color,'Puan verisi bulunamadı.');
+}
+function renderCityTopicChart(s){
+ const citiesTop=Array.from(s.cities.entries()).map(([id,count])=>({id,label:id<0?'Şehir bilinmiyor':(cityById.get(Number(id))||'Şehir '+id),count,topics:s.cityTopics.get(id)||new Map()})).sort((a,b)=>b.count-a.count).slice(0,8);
+ if(!citiesTop.length||!s.ids.length){$('cityTopicChart').innerHTML=emptySvg('Bu filtrelerle karşılaştırılacak şehir verisi bulunamadı.');return}
+ const legend=topics.slice().sort((a,b)=>Number(a.id)-Number(b.id)).map(t=>'<span><i style="background:'+COLORS[(Number(t.id)>=0?Number(t.id):0)%COLORS.length]+'"></i>'+esc(t.short||t.label||'Kategori '+t.id)+'</span>').join('');
+ const w=900,row=34,m={l:170,r:26,t:10,b:16},h=m.t+m.b+row*citiesTop.length,pw=w-m.l-m.r,max=Math.max(1,...citiesTop.map(c=>c.count));
+ let out=svgStart(w,h,'Şehirlerin kategori bileşimi');
+ citiesTop.forEach((c,i)=>{const cy=m.t+i*row+row/2;out+='<text class="bar-label" x="'+(m.l-12)+'" y="'+(cy+4)+'" text-anchor="end">'+esc(shorten(c.label,23))+'</text>';let x=m.l;for(const t of topics){const id=Number(t.id),n=c.topics.get(id)||0,bw=n/max*pw;out+='<rect x="'+x.toFixed(1)+'" y="'+(cy-8)+'" width="'+Math.max(0,bw).toFixed(1)+'" height="16" fill="'+COLORS[(id>=0?id:0)%COLORS.length]+'" opacity="'+(n?'.9':'0')+'"><title>'+esc(c.label)+' · '+esc(t.short||t.label)+': '+fmt(n)+' yorum</title></rect>';x+=bw}out+='<text class="axis-label" x="'+(w-m.r)+'" y="'+(cy+4)+'" text-anchor="end">'+fmt(c.count)+'</text>'});
+ out+='</svg>';$('cityTopicChart').innerHTML='<div class="mini-legend">'+legend+'</div>'+out;
+}
+function mixWithWhite(hex,ratio){const n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255,t=Math.max(0,Math.min(1,ratio));return 'rgb('+Math.round(255+(r-255)*t)+','+Math.round(255+(g-255)*t)+','+Math.round(255+(b-255)*t)+')'}
+function renderHeatmap(s){
+ const years=allYears,ts=topics.slice().sort((a,b)=>Number(a.id)-Number(b.id));
+ if(!years.length||!ts.length){$('heatmapChart').innerHTML=emptySvg('Isı haritası için yıl veya kategori bulunamadı.');return}
+ const left=178,cellW=Math.max(29,Math.min(44,800/Math.max(1,years.length))),cellH=29,top=15,bottom=72,w=left+years.length*cellW+25,h=top+ts.length*cellH+bottom;
+ let max=1;for(const t of ts)for(const y of years)max=Math.max(max,s.yearTopics.get(y+'|'+Number(t.id))||0);
+ let out=svgStart(w,h,'Yıl ve kategori bazında yorum sayısı');
+ ts.forEach((t,ri)=>{const y=top+ri*cellH;out+='<text class="bar-label" x="'+(left-12)+'" y="'+(y+cellH/2+4)+'" text-anchor="end">'+esc(shorten(t.short||t.label,24))+'</text>';years.forEach((year,ci)=>{const n=s.yearTopics.get(year+'|'+Number(t.id))||0;const x=left+ci*cellW+2,cy=y+3,alpha=n?0.18+0.82*Math.sqrt(n/max):0;out+='<rect x="'+x.toFixed(1)+'" y="'+cy+'" width="'+Math.max(3,cellW-4).toFixed(1)+'" height="'+(cellH-6)+'" rx="3" fill="'+(n?mixWithWhite(COLORS[(Number(t.id)>=0?Number(t.id):0)%COLORS.length],alpha):'#f1f2f6')+'"><title>'+year+' · '+esc(t.short||t.label)+': '+fmt(n)+' yorum</title></rect>'})});
+ years.forEach((year,i)=>{const x=left+i*cellW+cellW/2;out+='<text class="axis-label" transform="translate('+x.toFixed(1)+','+(top+ts.length*cellH+17)+') rotate(-45)" text-anchor="end">'+year+'</text>'});
+ out+='</svg>';$('heatmapChart').innerHTML=out;
+}
+function updateDashboard(){
+ if(!data)return;
+ const seq=++renderSequence,s=filteredStats(),n=s.ids.length,one=s.ratings.get(1)||0;
+ $('filterSummary').innerHTML='<strong>'+fmt(n)+' / '+fmt(points.length)+'</strong> yorum eşleşiyor';
+ $('datasetSummary').textContent='Kaynak veri: '+fmt(points.length)+' kayıt';
+ $('statReviews').textContent=fmt(n);$('statReviewsSub').textContent=(points.length?n/points.length*100:0).toLocaleString('tr-TR',{maximumFractionDigits:1})+'% kaynak verinin içinde';
+ $('statCities').textContent=fmt(s.citySet.size);$('statTopics').textContent=fmt(Array.from(s.topics.values()).filter(v=>v>0).length);$('statOneStar').textContent=pct(n?one/n*100:0);
+ if(!n){['yearChart','topicChart','cityChart','ratingChart','cityTopicChart','heatmapChart'].forEach(id=>$(id).innerHTML=emptySvg('Bu filtrelerle eşleşen yorum bulunamadı.'));return}
+ renderYearChart(s);renderTopicChart(s);renderCityChart(s);renderRatingChart(s);renderCityTopicChart(s);renderHeatmap(s);
+ if(seq!==renderSequence)return;
+}
+async function loadData(){
+ try{
+  $('filterSummary').textContent='Veri paketi yükleniyor…';
+  const response=await fetch('./review-universe.json.gz',{cache:'no-store'});
+  if(!response.ok)throw new Error('Veri paketi yüklenemedi (HTTP '+response.status+').');
+  if(!('DecompressionStream'in window))throw new Error('Tarayıcı sıkıştırılmış veri dosyasını açamıyor.');
+  const stream=response.body.pipeThrough(new DecompressionStream('gzip'));
+  data=JSON.parse(await new Response(stream).text());
+  if(!Array.isArray(data.points)||!Array.isArray(data.cities)||!Array.isArray(data.topics))throw new Error('Veri paketi beklenen alanları içermiyor.');
+  points=data.points;cities=data.cities;topics=data.topics;reviewYears=new Int16Array(points.length);
+  cities.forEach(c=>cityById.set(Number(c.id),c.name));topics.forEach(t=>topicById.set(Number(t.id),t));
+  for(let i=0;i<points.length;i++)reviewYears[i]=dayYear(points[i][6]);
+  populateFilters();
+  ['citySelect','yearSelect','topicSelect','ratingSelect'].forEach(id=>$(id).addEventListener('change',updateDashboard));
+  $('resetFilters').addEventListener('click',()=>{$('citySelect').value='-1';$('yearSelect').value='-1';$('topicSelect').value='-1';$('ratingSelect').value='0';updateDashboard()});
+  updateDashboard();
+ }catch(error){
+  $('filterSummary').textContent='Veri yüklenemedi';
+  $('chartGrid').innerHTML='<div class="error-card span-2">Grafikler hazırlanamadı: '+esc(error.message||error)+' Sayfayı yenileyerek tekrar deneyebilirsin.</div>';
+ }
+}
+loadData();
+})();
+</script>
+</body>
+</html>
