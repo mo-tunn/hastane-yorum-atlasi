@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#ffffff">
 <meta name="description" content="Hastane yorumlarını şehir, yıl, kategori ve puana göre inceleyen etkileşimli grafikler.">
-<title>Grafikler | Hastane Yorum Atlası</title>
+<title>Grafikler | Türkiye Hastaneleri Şikayet Atlası</title>
 <style>
 :root{color-scheme:light;--ink:#20242b;--muted:#747d89;--line:#e7e9ee;--surface:#fff;--soft:#f8f9fb;--accent:#5865d8;--accent-soft:#f2f3fd}
 *{box-sizing:border-box}
@@ -86,7 +86,7 @@ footer{padding:20px 0 0;color:#9aa1ab;font-size:10px;text-align:center}
 </head>
 <body>
 <header class="topbar">
- <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">&#10038;</span><span>Hastane Yorum Atlası</span></a>
+ <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">&#10038;</span><span>Türkiye Hastaneleri Şikayet Atlası</span></a>
  <nav class="page-nav" aria-label="Ana gezinme">
   <a class="page-link" href="./index.html">Embedding Evreni</a>
   <a class="page-link is-active" href="./grafikler.html" aria-current="page">Grafikler</a>
@@ -103,7 +103,7 @@ footer{padding:20px 0 0;color:#9aa1ab;font-size:10px;text-align:center}
 <main>
  <section class="intro">
   <div><p class="eyebrow">Analitik görünüm / 01</p><h1>Yorum verisine farklı<br> açılardan bak.</h1><p>Şehir, yıl, kategori ve yıldız puanını seç; aşağıdaki grafikler seçili veri kümesine göre birlikte güncellensin. Yorum hacmini, kategori paylarını ve şehirler arasındaki farklılıkları keşfet.</p></div>
-  <div class="data-note">Veri kapsamı: hastane kategorisindeki 1 ve 2 yıldızlı yorumlar. Grafikler kayıt sayılarını gösterir; tüm hasta deneyimlerinin temsili veya neden-sonuç kanıtı olarak değerlendirilmemelidir.</div>
+  <div class="data-note">Veri kapsamı: Türkiye içindeki hastaneler için 1 ve 2 yıldızlı yorumlar. Grafikler kayıt sayılarını gösterir; tüm hasta deneyimlerinin temsili veya neden-sonuç kanıtı olarak değerlendirilmemelidir.</div>
  </section>
 
  <section class="filter-panel" aria-label="Grafik filtreleri">
@@ -134,7 +134,7 @@ footer{padding:20px 0 0;color:#9aa1ab;font-size:10px;text-align:center}
   <article class="chart-card span-2"><div class="chart-head"><div><h2>Yıl × kategori ısı haritası</h2><p>Hücre koyulaştıkça o yıl ve kategorideki yorum sayısı artar</p></div><div class="heatmap-key"><span>Düşük</span><span class="heatmap-gradient" aria-hidden="true"></span><span>Yüksek</span></div></div><div class="chart-body scroll-x" id="heatmapChart"><div class="empty-message">Grafik hazırlanıyor…</div></div></article>
  </section>
  <p class="disclaimer">Not: Yorum kayıtları, normalize edilmiş metin sayısından farklı olabilir. Aynı yorum metni birden fazla kayıtta bulunabilir. Kategoriler keşif amaçlı gruplardır ve tek başlarına bir hastane hakkında kesin yargı oluşturmaz.</p>
- <footer>Hastane Yorum Atlası · Etkileşimli grafikler</footer>
+ <footer>Türkiye Hastaneleri Şikayet Atlası · Etkileşimli grafikler</footer>
 </main>
 
 <script>
@@ -251,7 +251,7 @@ async function loadData(){
   const stream=response.body.pipeThrough(new DecompressionStream('gzip'));
   data=JSON.parse(await new Response(stream).text());
   if(!Array.isArray(data.points)||!Array.isArray(data.cities)||!Array.isArray(data.topics))throw new Error('Veri paketi beklenen alanları içermiyor.');
-  points=data.points;cities=data.cities;topics=data.topics;reviewYears=new Int16Array(points.length);
+  const cityCharMap={};cityCharMap[String.fromCharCode(305)]='i';cityCharMap[String.fromCharCode(252)]='u';cityCharMap[String.fromCharCode(351)]='s';cityCharMap[String.fromCharCode(246)]='o';cityCharMap[String.fromCharCode(231)]='c';cityCharMap[String.fromCharCode(287)]='g';const normalizeCity=s=>Array.from(String(s||'').toLocaleLowerCase('tr-TR')).map(c=>cityCharMap[c]||c).join('');const excludedCityIds=new Set(data.cities.filter(c=>normalizeCity(c.name).includes('turkiye disi')).map(c=>Number(c.id)));cities=data.cities.filter(c=>!excludedCityIds.has(Number(c.id)));topics=data.topics;points=data.points.filter(p=>!excludedCityIds.has(Number(p[4])));reviewYears=new Int16Array(points.length);document.querySelectorAll('.count-badge').forEach(el=>el.textContent=fmt(points.length)+' yorum');
   cities.forEach(c=>cityById.set(Number(c.id),c.name));topics.forEach(t=>topicById.set(Number(t.id),t));
   for(let i=0;i<points.length;i++)reviewYears[i]=dayYear(points[i][6]);
   populateFilters();

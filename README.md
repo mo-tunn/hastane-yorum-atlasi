@@ -1,4 +1,4 @@
-# Hastane Yorum Atlası — Veri ve Üretim Notları
+# Türkiye Hastaneleri Şikayet Atlası — Veri ve Üretim Notları
 
 Bu depo, hastaneler hakkında yazılmış düşük puanlı yorumlardan oluşturulan analiz veri paketini ve bu paketin nasıl üretildiğini açıklayan dokümantasyonu içerir. Paket, her yorum kaydını 384 boyutlu metin embedding'lerinden elde edilen üç boyutlu koordinatlarla ve ilgili tema, şehir, puan, tarih ve tesis bilgileriyle eşleştirir.
 
